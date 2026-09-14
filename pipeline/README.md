@@ -45,7 +45,7 @@ pipeline/
     style_lint/linter.py   the style gate itself
   layers/common/      shared S3, DynamoDB and brief validation code
   infra/template.yaml SAM template: bucket, tracker, layer, functions, workflow
-  tests/              38 tests, no AWS account needed
+  tests/              47 tests, no AWS account needed
   tools/lint_local.py run the style gate over any markdown file
 ```
 
@@ -122,6 +122,20 @@ Following section 9 of the orchestration spec:
 - **CMS endpoint.** `publish_to_cms` posts the page as a draft if
   `CMS_ENDPOINT` is set, and skips the call if it is not. The CMS receives a
   draft on purpose. Going live stays a human action.
+
+## Escalation routes
+
+The handoff blocks define fields whose only purpose is to reach a person.
+Agent 2 raises `red_flags` and lists `escalate_to_consultant` for anything it
+cannot settle from the literature. Agent 3 lists
+`sentences_flagged_for_human_review` for anything it would not rewrite without
+risking meaning.
+
+Those travel inside the review notification under `needs_your_judgement`,
+rather than sitting in an artefact for someone to go and find. The counts are
+also written to the tracker, so the consultant queue can be sorted by how much
+judgement each page actually needs. `tests/test_escalations.py` covers the
+plumbing.
 
 ## The rule the graph enforces
 

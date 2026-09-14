@@ -230,6 +230,9 @@ Resources:
         Variables:
           REVIEW_APP_URL: !Ref ReviewAppUrl
       Policies:
+        # Reads the verifier and styler handoffs so the review request carries
+        # the escalations, not just links to them.
+        - S3ReadPolicy: { BucketName: !Ref ContentBucket }
         - DynamoDBCrudPolicy: { TableName: !Ref ArticleTracker }
         - SNSPublishMessagePolicy: { TopicName: !GetAtt ReviewTopic.TopicName }
 

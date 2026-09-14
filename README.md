@@ -46,7 +46,7 @@ EOF
 ## Pipeline
 
 ```bash
-make -C pipeline test     # 38 tests, no AWS account needed
+make -C pipeline test     # 47 tests, no AWS account needed
 make -C pipeline lint DRAFT=path/to/draft.md
 ```
 
