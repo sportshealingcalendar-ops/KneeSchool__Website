@@ -4,7 +4,11 @@ Static front end and content pipeline for KneeSchool, a spiral knee curriculum
 that teaches the same topic seven times at increasing depth.
 
 ```
-index.html        the homepage, self contained HTML and CSS, no JavaScript
+index.html        the homepage
+assets/styles.css one shared stylesheet, no build step, no JavaScript
+levels/           seven level landing pages, one per tier
+conditions/       the conditions library and the ACL template article
+tools/            check_site.py, the whole site check
 pipeline/         the three agent content pipeline: prompts, config, Lambdas,
                   Step Functions definition, SAM template, tests
 docs/             the handover and the team pack that drive both
@@ -24,7 +28,17 @@ repeating it.
 python3 -m http.server 8000
 ```
 
-Check it by eye at 375px, 768px and 1440px. Structure check:
+Check every page at once:
+
+```bash
+python3 tools/check_site.py
+```
+
+That covers tag balance, `lang`, em and en dashes, space hyphen space, the
+banned phrase and UK spelling rules from the pipeline config, and whether every
+relative link and in-page anchor actually resolves. Exit code 1 on any failure.
+
+Then check by eye at 375px, 768px and 1440px. Single page structure check:
 
 ```bash
 python3 - <<'EOF'
