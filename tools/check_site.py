@@ -83,6 +83,28 @@ def html_files():
     return sorted(out)
 
 
+# Warnings that have been looked at and deliberately kept. Each one needs a
+# reason, so the list stays short and the remaining warnings stay worth reading.
+# A warning with no entry here is a warning someone still has to answer for.
+EXEMPTIONS = [
+    ("levels/junior.html", "PHRASE-001", "meet the",
+     "chapter 0.5.5 is titled 'Meet the Researchers' in the architecture document; "
+     "the site label matches the source by decision"),
+    ("index.html", "PHRASE-001", "meet the",
+     "existing approved homepage copy, 'Meet the topic'; flagged to the client, not yet changed"),
+    ("index.html", "PHRASE-001", "not only",
+     "the rule targets 'not only X but also Y'; 'the person and not only the scan' is not that "
+     "construction, so this is a rule false positive"),
+]
+
+
+def exemption_for(rel, rule_id, phrase):
+    for path, rid, ph, reason in EXEMPTIONS:
+        if rel == path and rid == rule_id and ph == phrase:
+            return reason
+    return None
+
+
 def phrase_rules():
     rules = linter.load_rules(os.path.join(ROOT, "pipeline", "config", "lint_rules.json"))
     return [r for r in rules["rules"]
@@ -90,7 +112,7 @@ def phrase_rules():
 
 
 def main():
-    pages, failures, warnings = {}, [], []
+    pages, failures, warnings, exempt = {}, [], [], []
     files = html_files()
     if not files:
         print("no HTML files found")
@@ -126,7 +148,12 @@ def main():
             for phrase in rule["banned_phrases"]:
                 for hit in re.finditer(r"(?<![a-z])" + re.escape(phrase.lower()) + r"(?![a-z])", low):
                     ctx = re.sub(r"\s+", " ", body[max(0, hit.start() - 40):hit.end() + 25]).strip()
-                    warnings.append("%s: %s %r ... %s" % (rel, rule["id"], phrase, ctx))
+                    reason = exemption_for(rel, rule["id"], phrase)
+                    line = "%s: %s %r ... %s" % (rel, rule["id"], phrase, ctx)
+                    if reason:
+                        exempt.append("%s\n          reason: %s" % (line, reason))
+                    else:
+                        warnings.append(line)
 
     # ---- link integrity across the whole site ----
     for path, page in sorted(pages.items()):
@@ -156,12 +183,15 @@ def main():
                     failures.append("%s: link %r targets a missing anchor" % (rel, href))
 
     print("checked %d pages" % len(pages))
+    for e in exempt:
+        print("  KEPT  %s" % e)
     for w in warnings:
         print("  WARN  %s" % w)
     for f in failures:
         print("  FAIL  %s" % f)
     print("")
-    print("%d failures, %d warnings" % (len(failures), len(warnings)))
+    print("%d failures, %d warnings, %d deliberately kept"
+          % (len(failures), len(warnings), len(exempt)))
     return 1 if failures else 0
 
 
