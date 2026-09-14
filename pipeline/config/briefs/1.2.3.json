@@ -1,0 +1,91 @@
+{
+  "brief_version": "1.0",
+  "page_id": "1.2.3",
+  "title": "Menisci",
+  "section": {
+    "id": "1",
+    "name": "Knee Fundamentals"
+  },
+  "chapter": {
+    "id": "1.2",
+    "name": "Basic Knee Anatomy"
+  },
+  "tiers_required": [
+    "junior",
+    "patient",
+    "medical_student"
+  ],
+  "tier_notes": {
+    "junior": "Reading age 12 to 14. No clinical management content.",
+    "patient": "Plain language. End with when-to-seek-help message.",
+    "medical_student": "Foundation anatomy and function. No surgical technique."
+  },
+  "scope": {
+    "must_cover": [
+      "What the menisci are and where they sit",
+      "Medial versus lateral meniscus basics",
+      "Function: load sharing, stability, lubrication",
+      "Why tears matter, in outline only",
+      "Blood supply zones in simple terms (red, red-white, white)"
+    ],
+    "must_not_cover": [
+      "Detailed MRI grading (belongs to 5.x Imaging)",
+      "Repair versus meniscectomy decision-making (belongs to 7.x Surgery Academy)",
+      "Root tear biomechanics (belongs to 2.5.7 and 2.6.4)"
+    ],
+    "sibling_pages": [
+      "1.2.1",
+      "1.2.2",
+      "1.2.4",
+      "1.2.5"
+    ],
+    "deeper_spiral_pages": [
+      "2.5",
+      "2.6",
+      "6.x meniscal tears",
+      "7.x meniscal surgery"
+    ]
+  },
+  "curriculum_tags": [
+    "MedStudent-Anatomy",
+    "MRCS-A-feeder"
+  ],
+  "source_requirements": {
+    "kb_topic_filter": "meniscus",
+    "minimum": {
+      "textbook_or_review": 1,
+      "peer_reviewed_for_clinical_claims": true
+    },
+    "preferred_recency_years": 10,
+    "guidelines_expected": []
+  },
+  "output_requirements": {
+    "language": "en-GB",
+    "format": "markdown",
+    "key_learning_points_per_tier": {
+      "min": 3,
+      "max": 5
+    },
+    "faqs_patient_level": {
+      "min": 3,
+      "max": 5
+    },
+    "target_word_count": {
+      "min": 800,
+      "max": 1600
+    },
+    "internal_link_placeholders": true
+  },
+  "governance": {
+    "commercial_content_allowed": false,
+    "clinical_advice_allowed": false,
+    "junior_tier_present": true
+  },
+  "pipeline": {
+    "priority": "high",
+    "requested_by": "editor",
+    "created_at": "2026-08-28T00:00:00Z",
+    "regen_count": 0,
+    "consultant_assigned": null
+  }
+}

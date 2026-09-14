@@ -1,0 +1,6 @@
+.aws-sam/
+__pycache__/
+*.pyc
+samconfig.toml
+# staged at build time from config/lint_rules.json
+functions/style_lint/lint_rules.json

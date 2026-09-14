@@ -1,0 +1,315 @@
+{
+  "Comment": "KneeSchool content pipeline. Step Functions coordinates; each agent reasons only inside its own bounded step. Standard workflow because executions span days across the consultant gate and the full history is the audit trail.",
+  "StartAt": "LoadBrief",
+  "QueryLanguage": "JSONPath",
+  "States": {
+    "LoadBrief": {
+      "Type": "Task",
+      "Resource": "${LoadBriefArn}",
+      "Comment": "Rejects a brief that breaks a field or governance rule before any model is called.",
+      "Retry": [
+        { "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"], "IntervalSeconds": 2, "MaxAttempts": 3, "BackoffRate": 2 }
+      ],
+      "Catch": [
+        { "ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "BriefRejected" }
+      ],
+      "Next": "Generate"
+    },
+
+    "BriefRejected": {
+      "Type": "Fail",
+      "Error": "BriefRejected",
+      "Cause": "The content brief failed validation. Fix the brief and start a new execution."
+    },
+
+    "Generate": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:bedrockagentcore:invokeAgentRuntime",
+      "Parameters": {
+        "AgentRuntimeArn": "${AgentGeneratorArn}",
+        "Payload.$": "States.JsonToString($)"
+      },
+      "ResultSelector": { "payload.$": "States.StringToJson($.Response)" },
+      "ResultPath": "$.generated",
+      "Retry": [
+        { "ErrorEquals": ["States.TaskFailed"], "IntervalSeconds": 5, "MaxAttempts": 2, "BackoffRate": 2 }
+      ],
+      "Catch": [
+        { "ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "HoldForHuman" }
+      ],
+      "Next": "PersistDraft"
+    },
+
+    "PersistDraft": {
+      "Type": "Task",
+      "Resource": "${PersistArtifactArn}",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "stage": "draft",
+        "version.$": "$.version",
+        "payload.$": "$.generated.payload"
+      },
+      "ResultPath": "$.draft_artifact",
+      "Next": "Verify"
+    },
+
+    "Verify": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:bedrockagentcore:invokeAgentRuntime",
+      "Parameters": {
+        "AgentRuntimeArn": "${AgentVerifierArn}",
+        "Payload.$": "States.JsonToString($)"
+      },
+      "ResultSelector": { "payload.$": "States.StringToJson($.Response)" },
+      "ResultPath": "$.verified",
+      "Retry": [
+        { "ErrorEquals": ["States.TaskFailed"], "IntervalSeconds": 5, "MaxAttempts": 2, "BackoffRate": 2 }
+      ],
+      "Catch": [
+        { "ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "HoldForHuman" }
+      ],
+      "Next": "PersistVerified"
+    },
+
+    "PersistVerified": {
+      "Type": "Task",
+      "Resource": "${PersistArtifactArn}",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "stage": "verified",
+        "version.$": "$.version",
+        "payload.$": "$.verified.payload"
+      },
+      "ResultPath": "$.verified_artifact",
+      "Next": "VerifyOutcome"
+    },
+
+    "VerifyOutcome": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.verified.payload.status",
+          "StringEquals": "FAILED_RETURN_TO_GENERATION",
+          "Next": "CheckRegenCount"
+        }
+      ],
+      "Default": "Style"
+    },
+
+    "CheckRegenCount": {
+      "Type": "Choice",
+      "Comment": "Two failed regenerations is a systemic problem, not bad luck. Triage it rather than retrying.",
+      "Choices": [
+        { "Variable": "$.regen_count", "NumericLessThan": 2, "Next": "IncrementRegenCount" }
+      ],
+      "Default": "HoldForRegenFailure"
+    },
+
+    "IncrementRegenCount": {
+      "Type": "Pass",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "brief.$": "$.brief",
+        "artifact_prefix.$": "$.artifact_prefix",
+        "style_loops": 0,
+        "regen_count.$": "States.MathAdd($.regen_count, 1)",
+        "version.$": "States.MathAdd($.version, 1)",
+        "verification_feedback.$": "$.verified.payload"
+      },
+      "Next": "Generate"
+    },
+
+    "HoldForRegenFailure": {
+      "Type": "Pass",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "reason": "two failed verification rounds",
+        "regen_count.$": "$.regen_count",
+        "style_loops.$": "$.style_loops"
+      },
+      "Next": "HoldForHuman"
+    },
+
+    "Style": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:bedrockagentcore:invokeAgentRuntime",
+      "Comment": "Input is the verified draft only, never the sources, so the styler cannot introduce a new fact.",
+      "Parameters": {
+        "AgentRuntimeArn": "${AgentStylerArn}",
+        "Payload.$": "States.JsonToString($)"
+      },
+      "ResultSelector": { "payload.$": "States.StringToJson($.Response)" },
+      "ResultPath": "$.styled_result",
+      "Retry": [
+        { "ErrorEquals": ["States.TaskFailed"], "IntervalSeconds": 5, "MaxAttempts": 2, "BackoffRate": 2 }
+      ],
+      "Catch": [
+        { "ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "HoldForHuman" }
+      ],
+      "Next": "PersistStyled"
+    },
+
+    "PersistStyled": {
+      "Type": "Task",
+      "Resource": "${PersistArtifactArn}",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "stage": "styled",
+        "version.$": "$.version",
+        "payload.$": "$.styled_result.payload"
+      },
+      "ResultPath": "$.styled_artifact",
+      "Next": "Lint"
+    },
+
+    "Lint": {
+      "Type": "Task",
+      "Resource": "${StyleLintArn}",
+      "Comment": "Deterministic regex gate, not a model. A styler occasionally misses its own rules; a regex never does.",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "brief.$": "$.brief",
+        "styled.$": "$.styled_result.payload",
+        "style_loops.$": "$.style_loops"
+      },
+      "ResultPath": "$.lint",
+      "Next": "LintOutcome"
+    },
+
+    "LintOutcome": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "And": [
+            { "Variable": "$.lint.pass", "BooleanEquals": false },
+            { "Variable": "$.style_loops", "NumericLessThan": 2 }
+          ],
+          "Next": "IncrementStyleLoops"
+        },
+        { "Variable": "$.lint.pass", "BooleanEquals": false, "Next": "HoldForLintFailure" }
+      ],
+      "Default": "ConsultantReview"
+    },
+
+    "IncrementStyleLoops": {
+      "Type": "Pass",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "brief.$": "$.brief",
+        "artifact_prefix.$": "$.artifact_prefix",
+        "version.$": "$.version",
+        "regen_count.$": "$.regen_count",
+        "style_loops.$": "States.MathAdd($.style_loops, 1)",
+        "verified.$": "$.verified",
+        "lint_findings.$": "$.lint.findings"
+      },
+      "Next": "Style"
+    },
+
+    "HoldForLintFailure": {
+      "Type": "Pass",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "reason": "two failed style gate rounds",
+        "regen_count.$": "$.regen_count",
+        "style_loops.$": "$.style_loops"
+      },
+      "Next": "HoldForHuman"
+    },
+
+    "ConsultantReview": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Comment": "QA tier 4. There is no transition from Lint to Publish, so this gate cannot be bypassed.",
+      "Parameters": {
+        "FunctionName": "${CreateReviewTaskArn}",
+        "Payload": {
+          "task_token.$": "$$.Task.Token",
+          "payload.$": "$"
+        }
+      },
+      "HeartbeatSeconds": 1209600,
+      "ResultPath": "$.review",
+      "Catch": [
+        { "ErrorEquals": ["States.Timeout"], "ResultPath": "$.error", "Next": "HoldForReviewTimeout" }
+      ],
+      "Next": "ReviewOutcome"
+    },
+
+    "HoldForReviewTimeout": {
+      "Type": "Pass",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "reason": "consultant review not returned within fourteen days"
+      },
+      "Next": "HoldForHuman"
+    },
+
+    "ReviewOutcome": {
+      "Type": "Choice",
+      "Choices": [
+        { "Variable": "$.review.decision", "StringEquals": "approve", "Next": "Publish" },
+        { "Variable": "$.review.decision", "StringEquals": "amend", "Next": "ApplyAmendments" }
+      ],
+      "Default": "HoldForReject"
+    },
+
+    "HoldForReject": {
+      "Type": "Pass",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "reason": "rejected at consultant review"
+      },
+      "Next": "HoldForHuman"
+    },
+
+    "ApplyAmendments": {
+      "Type": "Task",
+      "Resource": "${ApplyAmendmentsArn}",
+      "Comment": "A consultant edit goes back through the style gate, so a human edit meets the same house style as a generated one.",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "version.$": "$.version",
+        "review.$": "$.review"
+      },
+      "ResultPath": "$.amended",
+      "Next": "MergeAmendments"
+    },
+
+    "MergeAmendments": {
+      "Type": "Pass",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "brief.$": "$.brief",
+        "artifact_prefix.$": "$.artifact_prefix",
+        "regen_count.$": "$.regen_count",
+        "style_loops": 0,
+        "version.$": "$.amended.version",
+        "styled_result": { "payload.$": "$.amended.styled" }
+      },
+      "Next": "Lint"
+    },
+
+    "HoldForHuman": {
+      "Type": "Task",
+      "Resource": "${NotifyEditorArn}",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "reason.$": "States.Format('{}', $.reason)"
+      },
+      "End": true
+    },
+
+    "Publish": {
+      "Type": "Task",
+      "Resource": "${PublishToCmsArn}",
+      "Parameters": {
+        "page_id.$": "$.page_id",
+        "brief.$": "$.brief",
+        "version.$": "$.version"
+      },
+      "ResultPath": "$.published",
+      "End": true
+    }
+  }
+}

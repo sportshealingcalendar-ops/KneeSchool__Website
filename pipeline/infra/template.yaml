@@ -1,0 +1,376 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  KneeSchool content pipeline. Step Functions coordinates three Bedrock
+  AgentCore runtimes, a deterministic style gate and a non bypassable
+  consultant review, writing artefacts to S3 and status to DynamoDB.
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+  ContentBucketName:
+    Type: String
+    Description: Globally unique bucket name, for example kneeschool-content-dev.
+  AgentGeneratorArn:
+    Type: String
+    Default: ""
+    Description: AgentCore runtime ARN for agent-generator. Leave blank until the runtime exists.
+  AgentVerifierArn:
+    Type: String
+    Default: ""
+  AgentStylerArn:
+    Type: String
+    Default: ""
+  ReviewAppUrl:
+    Type: String
+    Default: ""
+    Description: Base URL of the consultant review app.
+  CmsEndpoint:
+    Type: String
+    Default: ""
+    Description: CMS ingest endpoint. A published page arrives there as a draft.
+  EditorEmail:
+    Type: String
+    Description: Address that receives hold notifications and the budget alarm.
+  MonthlyBudgetUsd:
+    Type: Number
+    Default: 500
+    Description: Model spend is the dominant cost. This alarms, it does not cap.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 60
+    MemorySize: 512
+    Architectures: [arm64]
+    Tracing: Active
+    Layers: [!Ref CommonLayer]
+    Environment:
+      Variables:
+        CONTENT_BUCKET: !Ref ContentBucket
+        TRACKER_TABLE: !Ref ArticleTracker
+        REVIEW_TOPIC_ARN: !Ref ReviewTopic
+        EDITOR_TOPIC_ARN: !Ref EditorTopic
+
+Resources:
+
+  # ---------------------------------------------------------------- storage
+
+  ContentBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Ref ContentBucketName
+      VersioningConfiguration:
+        Status: Enabled
+      # Object Lock can only be turned on when a bucket is created, so it is
+      # enabled here even though retention is applied per object at publish
+      # time. Turning it on later means making a new bucket.
+      ObjectLockEnabled: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # Textbook extracts are licensed for internal review only. Everything except
+  # the knowledge base ingestion role is denied read access to that prefix.
+  ContentBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ContentBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "${ContentBucket.Arn}"
+              - !Sub "${ContentBucket.Arn}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+          - Sid: RestrictTextbookExtracts
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: !Sub "${ContentBucket.Arn}/sources/*/textbook-extracts/*"
+            Condition:
+              StringNotEquals:
+                aws:PrincipalArn: !GetAtt KnowledgeBaseIngestionRole.Arn
+
+  KnowledgeBaseIngestionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: bedrock.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: read-sources
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: ["s3:GetObject", "s3:ListBucket"]
+                Resource:
+                  - !Sub "${ContentBucket.Arn}"
+                  - !Sub "${ContentBucket.Arn}/sources/*"
+
+  ArticleTracker:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "kneeschool-article-tracker-${EnvironmentName}"
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      AttributeDefinitions:
+        - { AttributeName: page_id, AttributeType: S }
+        - { AttributeName: publication_status, AttributeType: S }
+        - { AttributeName: section, AttributeType: S }
+        - { AttributeName: qa_status, AttributeType: S }
+      KeySchema:
+        - { AttributeName: page_id, KeyType: HASH }
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1-status
+          KeySchema:
+            - { AttributeName: publication_status, KeyType: HASH }
+            - { AttributeName: page_id, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
+        - IndexName: GSI2-section
+          KeySchema:
+            - { AttributeName: section, KeyType: HASH }
+            - { AttributeName: page_id, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
+        - IndexName: GSI3-qa-status
+          KeySchema:
+            - { AttributeName: qa_status, KeyType: HASH }
+            - { AttributeName: page_id, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
+
+  # ---------------------------------------------------------------- messaging
+
+  ReviewTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "kneeschool-consultant-review-${EnvironmentName}"
+
+  EditorTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "kneeschool-editor-holds-${EnvironmentName}"
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref EditorEmail
+
+  # ---------------------------------------------------------------- code
+
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Metadata:
+      BuildMethod: python3.12
+    Properties:
+      LayerName: !Sub "kneeschool-common-${EnvironmentName}"
+      ContentUri: ../layers/common
+      CompatibleRuntimes: [python3.12]
+      RetentionPolicy: Delete
+
+  LoadBriefFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../functions/load_brief
+      Handler: handler.handler
+      Policies:
+        - S3ReadPolicy: { BucketName: !Ref ContentBucket }
+        - DynamoDBCrudPolicy: { TableName: !Ref ArticleTracker }
+
+  PersistArtifactFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../functions/persist_artifact
+      Handler: handler.handler
+      Timeout: 120
+      Policies:
+        - S3CrudPolicy: { BucketName: !Ref ContentBucket }
+        - DynamoDBCrudPolicy: { TableName: !Ref ArticleTracker }
+
+  StyleLintFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../functions/style_lint
+      Handler: handler.handler
+      Timeout: 120
+      MemorySize: 1024
+      Policies:
+        - S3CrudPolicy: { BucketName: !Ref ContentBucket }
+        - DynamoDBCrudPolicy: { TableName: !Ref ArticleTracker }
+
+  CreateReviewTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../functions/create_review_task
+      Handler: handler.handler
+      Environment:
+        Variables:
+          REVIEW_APP_URL: !Ref ReviewAppUrl
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref ArticleTracker }
+        - SNSPublishMessagePolicy: { TopicName: !GetAtt ReviewTopic.TopicName }
+
+  ApplyAmendmentsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../functions/apply_amendments
+      Handler: handler.handler
+      Policies:
+        - S3CrudPolicy: { BucketName: !Ref ContentBucket }
+        - DynamoDBCrudPolicy: { TableName: !Ref ArticleTracker }
+
+  NotifyEditorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../functions/notify_editor
+      Handler: handler.handler
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref ArticleTracker }
+        - SNSPublishMessagePolicy: { TopicName: !GetAtt EditorTopic.TopicName }
+
+  PublishToCmsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../functions/publish_to_cms
+      Handler: handler.handler
+      Timeout: 120
+      Environment:
+        Variables:
+          CMS_ENDPOINT: !Ref CmsEndpoint
+      Policies:
+        - S3CrudPolicy: { BucketName: !Ref ContentBucket }
+        - DynamoDBCrudPolicy: { TableName: !Ref ArticleTracker }
+
+  # ---------------------------------------------------------------- workflow
+
+  PipelineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/vendedlogs/states/kneeschool-content-pipeline-${EnvironmentName}"
+      RetentionInDays: 365
+
+  ContentPipeline:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub "kneeschool-content-pipeline-${EnvironmentName}"
+      # Standard, not Express: executions span days across the consultant gate
+      # and the full execution history is the audit trail.
+      Type: STANDARD
+      DefinitionUri: ../statemachine/content-pipeline.asl.json
+      DefinitionSubstitutions:
+        LoadBriefArn: !GetAtt LoadBriefFunction.Arn
+        PersistArtifactArn: !GetAtt PersistArtifactFunction.Arn
+        StyleLintArn: !GetAtt StyleLintFunction.Arn
+        CreateReviewTaskArn: !GetAtt CreateReviewTaskFunction.Arn
+        ApplyAmendmentsArn: !GetAtt ApplyAmendmentsFunction.Arn
+        NotifyEditorArn: !GetAtt NotifyEditorFunction.Arn
+        PublishToCmsArn: !GetAtt PublishToCmsFunction.Arn
+        AgentGeneratorArn: !Ref AgentGeneratorArn
+        AgentVerifierArn: !Ref AgentVerifierArn
+        AgentStylerArn: !Ref AgentStylerArn
+      Tracing:
+        Enabled: true
+      Logging:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt PipelineLogGroup.Arn
+      Policies:
+        - LambdaInvokePolicy: { FunctionName: !Ref LoadBriefFunction }
+        - LambdaInvokePolicy: { FunctionName: !Ref PersistArtifactFunction }
+        - LambdaInvokePolicy: { FunctionName: !Ref StyleLintFunction }
+        - LambdaInvokePolicy: { FunctionName: !Ref CreateReviewTaskFunction }
+        - LambdaInvokePolicy: { FunctionName: !Ref ApplyAmendmentsFunction }
+        - LambdaInvokePolicy: { FunctionName: !Ref NotifyEditorFunction }
+        - LambdaInvokePolicy: { FunctionName: !Ref PublishToCmsFunction }
+        - Statement:
+            - Effect: Allow
+              Action: ["bedrock-agentcore:InvokeAgentRuntime"]
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - logs:CreateLogDelivery
+                - logs:GetLogDelivery
+                - logs:UpdateLogDelivery
+                - logs:DeleteLogDelivery
+                - logs:ListLogDeliveries
+                - logs:PutResourcePolicy
+                - logs:DescribeResourcePolicies
+                - logs:DescribeLogGroups
+              Resource: "*"
+
+  # ---------------------------------------------------------------- guardrails
+
+  # Publishing a page that still carries a red flag should be impossible.
+  # If this alarm ever fires, the gate has a defect.
+  RedFlagPublishedAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "kneeschool-red-flag-published-${EnvironmentName}"
+      AlarmDescription: A page reached publication with an unresolved red flag.
+      Namespace: KneeSchool/Pipeline
+      MetricName: RedFlagPublished
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref EditorTopic]
+
+  ModelSpendBudget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: !Sub "kneeschool-pipeline-${EnvironmentName}"
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit:
+          Amount: !Ref MonthlyBudgetUsd
+          Unit: USD
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref EditorEmail
+
+Outputs:
+  ContentBucketName:
+    Value: !Ref ContentBucket
+  TrackerTableName:
+    Value: !Ref ArticleTracker
+  StateMachineArn:
+    Value: !Ref ContentPipeline
+  ReviewTopicArn:
+    Value: !Ref ReviewTopic
+  KnowledgeBaseIngestionRoleArn:
+    Description: Attach this role to the Bedrock knowledge base data source.
+    Value: !GetAtt KnowledgeBaseIngestionRole.Arn

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KneeSchool | One knee, seven depths of understanding</title>
+<meta name="description" content="A spiral knee curriculum. The same anatomy, imaging and surgery explained again at greater depth, from school age to consultant level.">
+<meta name="theme-color" content="#0E2A21">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root{
+  --green-900:#0E2A21;
+  --green-800:#123428;
+  --green-700:#174336;
+  --green-500:#2E6B56;
+  --ivory:#F5F1E6;
+  --ivory-2:#EAE3D2;
+  --ink:#16221D;
+  --ink-soft:#41504A;
+  --gold:#C3A046;
+  --gold-dark:#8F701F;
+  --rule:rgba(22,34,29,.18);
+  --rule-dark:rgba(245,241,230,.22);
+  --display:"Newsreader","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --body:"Source Serif 4","Iowan Old Style",Georgia,"Times New Roman",serif;
+  --measure:66ch;
+  --pad:clamp(1.15rem,4vw,3.25rem);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{
+  margin:0;
+  background:var(--ivory);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:clamp(1.02rem,.96rem + .35vw,1.15rem);
+  line-height:1.68;
+  font-weight:400;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+h1,h2,h3,h4{font-family:var(--display);font-weight:400;line-height:1.14;letter-spacing:-.012em;margin:0}
+p{margin:0 0 1rem}
+p:last-child{margin-bottom:0}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px}
+
+section[id],footer[id],div[id]{scroll-margin-top:1.5rem}
+h1,h2,h3,p,li,a{overflow-wrap:break-word}
+.wrap{max-width:76rem;margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
+.band{padding:clamp(3rem,7vw,5.5rem) 0}
+.dark{background:var(--green-900);color:var(--ivory)}
+.dark h2,.dark h3{color:var(--ivory)}
+.lede{max-width:var(--measure);color:var(--ink-soft)}
+.dark .lede{color:rgba(245,241,230,.78)}
+
+/* ---------- header ---------- */
+.site-head{background:var(--green-900);color:var(--ivory);position:relative;z-index:20}
+.head-in{display:flex;align-items:center;gap:1.5rem;min-height:4.5rem;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.5rem;letter-spacing:.005em;text-decoration:none;margin-right:auto;display:flex;align-items:baseline;gap:.45rem}
+.brand b{font-weight:500}
+.brand span{color:var(--gold);font-weight:300}
+.nav ul{display:flex;gap:clamp(.9rem,1.9vw,1.7rem);list-style:none;margin:0;padding:0}
+.nav a{text-decoration:none;font-size:.97rem;color:rgba(245,241,230,.86);padding:.4rem 0;border-bottom:1px solid transparent}
+.nav a:hover{color:var(--ivory);border-bottom-color:var(--gold)}
+.nav-toggle{position:absolute;opacity:0;width:1px;height:1px}
+.burger{display:none;font-family:var(--body);font-size:.95rem;color:var(--ivory);border:1px solid var(--rule-dark);padding:.4rem .8rem;cursor:pointer;background:none}
+@media (max-width:860px){
+  .burger{display:inline-block;margin-left:auto}
+  .brand{margin-right:0}
+  .nav{flex-basis:100%;display:none;padding-bottom:1rem}
+  .nav ul{flex-direction:column;gap:0}
+  .nav li{border-top:1px solid var(--rule-dark)}
+  .nav a{display:block;padding:.75rem 0;font-size:1.05rem}
+  .nav-toggle:checked ~ .nav{display:block}
+  .nav-toggle:focus-visible ~ .burger{outline:2px solid var(--gold);outline-offset:3px}
+}
+
+/* ---------- hero ---------- */
+.hero{background:var(--green-900);color:var(--ivory);padding:clamp(2.75rem,6vw,5rem) 0 clamp(3rem,6vw,5.5rem)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(2rem,4.5vw,4rem);align-items:start}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(2.5rem,6.2vw,4.3rem);font-weight:300;line-height:1.05}
+.hero h1 em{font-style:italic;font-weight:300}
+.hero p{max-width:34ch;color:rgba(245,241,230,.8);margin-top:1.4rem;font-size:1.1rem}
+.actions{display:flex;flex-wrap:wrap;gap:.85rem;margin-top:2rem}
+.btn{display:inline-block;text-decoration:none;font-family:var(--body);font-size:1rem;padding:.78rem 1.5rem;border:1px solid var(--gold);color:var(--green-900);background:var(--gold)}
+.btn:hover{background:#D2B360;border-color:#D2B360}
+.btn.ghost{background:transparent;color:var(--ivory)}
+.btn.ghost:hover{background:rgba(195,160,70,.14)}
+
+/* ---------- depth dial ---------- */
+.dial{border:1px solid var(--rule-dark);padding:clamp(1.2rem,2.6vw,1.9rem);background:var(--green-800);position:relative}
+.dial-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;border-bottom:1px solid var(--rule-dark);padding-bottom:.8rem;margin-bottom:1.1rem}
+.dial-head h2{font-size:1.4rem}
+.dial-head small{font-size:.85rem;color:var(--gold);font-family:var(--body)}
+.dial input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.dial-tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:.25rem;margin-bottom:1.2rem}
+.dial-tabs label{
+  display:block;text-align:center;cursor:pointer;font-size:clamp(.72rem,1.05vw,.82rem);line-height:1.2;
+  padding:.55rem .15rem;border-top:2px solid rgba(245,241,230,.25);color:rgba(245,241,230,.62);
+}
+.dial-tabs label:hover{color:var(--ivory)}
+.dial-panel{display:none}
+.dial-panel h3{font-size:1.15rem;color:var(--gold);margin-bottom:.5rem;font-weight:500}
+.dial-panel p{color:rgba(245,241,230,.88);font-size:1.02rem;margin:0}
+#d0:checked ~ .dial-tabs label[for=d0],
+#d1:checked ~ .dial-tabs label[for=d1],
+#d2:checked ~ .dial-tabs label[for=d2],
+#d3:checked ~ .dial-tabs label[for=d3],
+#d4:checked ~ .dial-tabs label[for=d4],
+#d5:checked ~ .dial-tabs label[for=d5],
+#d6:checked ~ .dial-tabs label[for=d6]{color:var(--ivory);border-top-color:var(--gold)}
+#d0:checked ~ .dial-body .p0,
+#d1:checked ~ .dial-body .p1,
+#d2:checked ~ .dial-body .p2,
+#d3:checked ~ .dial-body .p3,
+#d4:checked ~ .dial-body .p4,
+#d5:checked ~ .dial-body .p5,
+#d6:checked ~ .dial-body .p6{display:block}
+#d0:focus-visible ~ .dial-tabs label[for=d0],
+#d1:focus-visible ~ .dial-tabs label[for=d1],
+#d2:focus-visible ~ .dial-tabs label[for=d2],
+#d3:focus-visible ~ .dial-tabs label[for=d3],
+#d4:focus-visible ~ .dial-tabs label[for=d4],
+#d5:focus-visible ~ .dial-tabs label[for=d5],
+#d6:focus-visible ~ .dial-tabs label[for=d6]{outline:2px solid var(--gold);outline-offset:2px}
+.dial-body{min-height:12.5rem}
+@media (max-width:560px){
+  .dial-tabs{grid-template-columns:repeat(4,1fr);gap:.35rem}
+  .dial-body{min-height:15.5rem}
+}
+
+/* ---------- section heading ---------- */
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(1rem,3vw,3rem);align-items:end;border-bottom:1px solid var(--rule);padding-bottom:1.4rem;margin-bottom:2.4rem}
+.dark .sec-head{border-bottom-color:var(--rule-dark)}
+.sec-head h2{font-size:clamp(1.85rem,3.6vw,2.7rem);font-weight:300}
+@media (max-width:760px){.sec-head{grid-template-columns:1fr;align-items:start;gap:1rem}}
+
+/* ---------- spiral steps ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.4rem,3vw,2.6rem);counter-reset:s}
+@media (max-width:760px){.steps{grid-template-columns:1fr}}
+.step{border-top:1px solid var(--rule);padding-top:1rem}
+.step h3{font-size:1.25rem;margin-bottom:.5rem}
+.step h3::before{counter-increment:s;content:counter(s) ". ";color:var(--gold-dark)}
+.step p{color:var(--ink-soft);font-size:1rem}
+
+/* ---------- levels ladder ---------- */
+.level{display:grid;grid-template-columns:12rem minmax(0,1fr) 9rem;gap:clamp(1rem,3vw,2.5rem);align-items:start;padding:1.6rem 0;border-top:1px solid var(--rule)}
+.level:last-child{border-bottom:1px solid var(--rule)}
+.level h3{font-size:1.3rem}
+.level .who{color:var(--gold-dark);font-size:.92rem;margin-top:.3rem}
+.level p{color:var(--ink-soft);font-size:1rem;margin:0}
+.level a{font-size:.95rem;text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:2px;white-space:nowrap}
+.level a:hover{color:var(--gold-dark)}
+.depth{display:flex;gap:3px;margin-top:.85rem}
+.depth i{display:block;height:6px;flex:1;background:var(--ivory-2)}
+.depth i.on{background:var(--green-500)}
+@media (max-width:820px){
+  .level{grid-template-columns:1fr;gap:.7rem}
+  .level .go{margin-top:.4rem}
+}
+
+.dark .level{border-top-color:var(--rule-dark)}
+.dark .level:last-child{border-bottom-color:var(--rule-dark)}
+.dark .level p{color:rgba(245,241,230,.76)}
+.dark .level .who{color:var(--gold)}
+.dark .level a{color:var(--ivory)}
+.dark .level a:hover{color:var(--gold)}
+.dark .depth i{background:rgba(245,241,230,.16)}
+.dark .depth i.on{background:var(--gold)}
+
+/* ---------- encyclopaedia columns ---------- */
+#encyclopaedia{background:var(--green-800)}
+.col-list{columns:4 12rem;column-gap:clamp(1.4rem,3vw,2.5rem);list-style:none;margin:0;padding:0}
+.col-list li{margin:0 0 .45rem;break-inside:avoid}
+.col-list a{text-decoration:none;color:rgba(245,241,230,.82);font-size:1rem}
+.col-list a:hover{color:var(--ivory);text-decoration:underline;text-underline-offset:3px}
+.sub-head{font-size:1.05rem;color:var(--gold);font-weight:500;padding-bottom:.6rem;border-bottom:1px solid var(--rule-dark);margin:0 0 .9rem}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(13.5rem,1fr));gap:clamp(1.4rem,3vw,2.5rem)}
+.col h3{font-size:1.05rem;color:var(--gold);padding-bottom:.6rem;border-bottom:1px solid var(--rule-dark);margin-bottom:.7rem;font-weight:500}
+.col ul{list-style:none;margin:0;padding:0}
+.col li{margin:0 0 .45rem}
+.col a{text-decoration:none;color:rgba(245,241,230,.82);font-size:1rem}
+.col a:hover{color:var(--ivory);text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- holistic ---------- */
+.holistic{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:clamp(1.6rem,4vw,3.5rem);align-items:start}
+@media (max-width:820px){.holistic{grid-template-columns:1fr}}
+.factors{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:1.3rem}
+@media (max-width:620px){.factors{grid-template-columns:1fr}}
+.factors h3{font-size:1.05rem;margin-bottom:.3rem}
+.factors p{font-size:.98rem;color:var(--ink-soft);margin:0}
+.factors li{border-left:2px solid var(--gold);padding-left:.9rem}
+
+/* ---------- tools ---------- */
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.tool{background:var(--ivory);padding:clamp(1.2rem,2.6vw,1.8rem)}
+.tool h3{font-size:1.2rem;margin-bottom:.45rem}
+.tool p{font-size:.98rem;color:var(--ink-soft);margin-bottom:.8rem}
+.tool a{font-size:.95rem;text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:2px}
+
+/* ---------- chapter grid ---------- */
+.chapters{display:grid;grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr));gap:clamp(1.3rem,3vw,2.2rem)}
+.chapter{border-top:1px solid var(--rule);padding-top:.9rem}
+.chapter .num{display:block;font-size:.84rem;color:var(--gold-dark);margin-bottom:.2rem}
+.chapter h3{font-size:1.14rem;margin-bottom:.4rem}
+.chapter p{font-size:.98rem;color:var(--ink-soft);margin:0}
+.dark .chapter{border-top-color:var(--rule-dark)}
+.dark .chapter .num{color:var(--gold)}
+.dark .chapter p{color:rgba(245,241,230,.78)}
+
+/* ---------- rules panel ---------- */
+.rules{border-left:2px solid var(--gold);padding-left:1.1rem;max-width:var(--measure)}
+.rules ul{list-style:none;margin:0;padding:0}
+.rules li{margin:0 0 .85rem;font-size:.98rem;color:var(--ink-soft)}
+.rules li:last-child{margin-bottom:0}
+.rules b{font-family:var(--body);font-weight:600;color:var(--ink)}
+.dark .rules li{color:rgba(245,241,230,.78)}
+.dark .rules b{color:var(--ivory)}
+
+/* ---------- note panel ---------- */
+.note{border:1px solid var(--rule);padding:clamp(1rem,2.4vw,1.4rem);max-width:var(--measure);font-size:.97rem;color:var(--ink-soft)}
+.note p{margin-bottom:.7rem}
+.dark .note{border-color:var(--rule-dark);color:rgba(245,241,230,.78)}
+
+/* ---------- mapping tables ---------- */
+.table-scroll{overflow-x:auto}
+.map-title{font-size:1.2rem;font-weight:400;margin:0 0 .9rem}
+.map{width:100%;border-collapse:collapse;font-size:.97rem;min-width:44rem}
+.map th{text-align:left;font-family:var(--body);font-weight:600;font-size:.86rem;color:var(--gold-dark);
+  border-bottom:1px solid var(--rule);padding:0 1.2rem .55rem 0;vertical-align:bottom}
+.map td{padding:.8rem 1.2rem .8rem 0;border-bottom:1px solid var(--rule);color:var(--ink-soft);vertical-align:top}
+.map td:first-child{color:var(--ink);width:22%}
+.map tr:last-child td{border-bottom:0}
+.dark .map th{color:var(--gold);border-bottom-color:var(--rule-dark)}
+.dark .map td{color:rgba(245,241,230,.76);border-bottom-color:var(--rule-dark)}
+.dark .map td:first-child{color:var(--ivory)}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+@media (max-width:760px){
+  .map{min-width:0}
+  .map thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .map tr{display:block;border-bottom:1px solid var(--rule);padding:1.1rem 0}
+  .map tr:last-child{border-bottom:0}
+  .map td{display:block;width:auto;border:0;padding:0 0 .6rem}
+  .map td:first-child{width:auto}
+  .map td:last-child{padding-bottom:0}
+  .map td::before{content:attr(data-label);display:block;font-size:.8rem;color:var(--gold-dark)}
+  .dark .map tr{border-bottom-color:var(--rule-dark)}
+  .dark .map td::before{color:var(--gold)}
+}
+
+/* ---------- four step pipeline ---------- */
+.steps.four{grid-template-columns:repeat(4,1fr)}
+@media (max-width:900px){.steps.four{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:620px){.steps.four{grid-template-columns:1fr}}
+.dark .step{border-top-color:var(--rule-dark)}
+.dark .step p{color:rgba(245,241,230,.78)}
+.dark .step h3::before{color:var(--gold)}
+#standards{background:var(--green-800)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(1.6rem,4vw,3.5rem);align-items:start}
+@media (max-width:820px){.split{grid-template-columns:1fr}}
+.stack{margin-top:clamp(2.4rem,5vw,3.4rem)}
+
+/* ---------- CTA ---------- */
+.cta{background:var(--green-700);color:var(--ivory);padding:clamp(2.5rem,5vw,4rem) 0}
+.cta-in{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(1.5rem,4vw,3rem);align-items:center}
+@media (max-width:760px){.cta-in{grid-template-columns:1fr}}
+.cta h2{font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:300}
+.cta p{color:rgba(245,241,230,.82);margin-top:.8rem;max-width:48ch}
+
+/* ---------- footer ---------- */
+.site-foot{background:var(--green-900);color:rgba(245,241,230,.72);padding:clamp(2.5rem,5vw,3.5rem) 0 2.5rem;font-size:.95rem}
+.foot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:2rem;padding-bottom:2rem;border-bottom:1px solid var(--rule-dark)}
+.foot-grid h3{font-size:1rem;color:var(--gold);margin-bottom:.7rem;font-weight:500}
+.foot-grid ul{list-style:none;margin:0;padding:0}
+.foot-grid li{margin-bottom:.4rem}
+.foot-grid a{text-decoration:none}
+.foot-grid a:hover{color:var(--ivory);text-decoration:underline;text-underline-offset:3px}
+.legal{padding-top:1.6rem;display:flex;flex-wrap:wrap;gap:1rem 2rem;justify-content:space-between;font-size:.88rem;color:rgba(245,241,230,.6)}
+.legal p{max-width:60ch}
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <a class="brand" href="#top"><b>Knee</b><span>School</span></a>
+    <input class="nav-toggle" type="checkbox" id="navtoggle" aria-label="Show navigation">
+    <label class="burger" for="navtoggle">Menu</label>
+    <nav class="nav" aria-label="Main">
+      <ul>
+        <li><a href="#levels">Learn by level</a></li>
+        <li><a href="#junior">Junior</a></li>
+        <li><a href="#encyclopaedia">Encyclopaedia</a></li>
+        <li><a href="#conditions">Conditions</a></li>
+        <li><a href="#curriculum">Curriculum</a></li>
+        <li><a href="#tools">Practise</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <h1>One knee.<br>Seven depths of <em>understanding</em>.</h1>
+        <p>KneeSchool teaches the same knee again and again, each time in more detail, from a school science lesson to consultant level surgery.</p>
+        <div class="actions">
+          <a class="btn" href="#levels">Find your level</a>
+          <a class="btn ghost" href="#encyclopaedia">Open the encyclopaedia</a>
+        </div>
+      </div>
+
+      <div class="dial">
+        <div class="dial-head">
+          <h2>Anterior cruciate ligament</h2>
+          <small>Choose a depth</small>
+        </div>
+        <input type="radio" name="depth" id="d0">
+        <input type="radio" name="depth" id="d1" checked>
+        <input type="radio" name="depth" id="d2">
+        <input type="radio" name="depth" id="d3">
+        <input type="radio" name="depth" id="d4">
+        <input type="radio" name="depth" id="d5">
+        <input type="radio" name="depth" id="d6">
+        <div class="dial-tabs">
+          <label for="d0">Junior</label>
+          <label for="d1">Patient</label>
+          <label for="d2">Student</label>
+          <label for="d3">MRCS</label>
+          <label for="d4">FRCS</label>
+          <label for="d5">Fellow</label>
+          <label for="d6">Consultant</label>
+        </div>
+        <div class="dial-body">
+          <div class="dial-panel p0">
+            <h3>The knee's strongest brake</h3>
+            <p>The ACL is a short, tough band deep inside the knee. It stops the shin bone sliding forward when you turn, land or stop quickly. An athlete who tears it often hears a pop, and the knee swells the same day. Warm up programmes that train landing and turning lower the risk. If a knee gives way, swells or hurts to stand on, tell a parent, a teacher or a coach, and have it looked at by a health professional.</p>
+          </div>
+          <div class="dial-panel p1">
+            <h3>What it is and why it matters</h3>
+            <p>A strong cord inside the knee that stops the shin sliding forward. People often describe a pop, swelling within a few hours, and a knee that gives way on turning. Not every tear needs surgery. The decision depends on your symptoms and what you need the knee to do.</p>
+          </div>
+          <div class="dial-panel p2">
+            <h3>Structure and function</h3>
+            <p>An intracapsular, extrasynovial ligament running from the medial wall of the lateral femoral condyle to the anterior intercondylar area of the tibia. Two functional bundles, anteromedial and posterolateral. It is the primary restraint to anterior tibial translation and a secondary restraint to rotation.</p>
+          </div>
+          <div class="dial-panel p3">
+            <h3>Examination and imaging</h3>
+            <p>Lachman is the most sensitive clinical test. The pivot shift demonstrates rotatory instability and correlates with function. A Segond fracture on plain radiograph implies a rupture until proven otherwise. MRI confirms the tear and grades meniscal, ramp and chondral injury.</p>
+          </div>
+          <div class="dial-panel p4">
+            <h3>Decision and evidence</h3>
+            <p>Reconstruct on instability and demand rather than on the scan alone. Graft choice trades re-rupture risk against donor site morbidity and is age dependent. Missed posterolateral corner injury, ramp lesion or excessive tibial slope are recognised causes of early graft failure.</p>
+          </div>
+          <div class="dial-panel p5">
+            <h3>Revision and complex cases</h3>
+            <p>Revision starts with tunnel position and tunnel width on CT. Stage with bone graft when tunnels are confluent or wide. Address meniscal deficiency, coronal malalignment and slope. Add lateral extra-articular tenodesis in high grade pivot, young pivoting athletes and revision.</p>
+          </div>
+          <div class="dial-panel p6">
+            <h3>Open questions</h3>
+            <p>Repair versus reconstruction in proximal avulsion. The slope threshold that justifies anterior closing wedge osteotomy. Whether criterion based return to sport testing changes re-rupture rates in adolescents. How registry data should shape graft choice in routine practice.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band wrap" id="spiral">
+    <div class="sec-head">
+      <h2>How the spiral works</h2>
+      <p class="lede">Topics repeat rather than end. Each pass assumes the last one, adds a layer of evidence or technique, then sends you back to the same structure with better questions.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h3>Meet the topic</h3>
+        <p>Plain language first. What the structure does, what it feels like when it fails, and what usually happens next.</p>
+      </div>
+      <div class="step">
+        <h3>Return with detail</h3>
+        <p>The same structure in anatomy, biomechanics, examination and imaging. Enough to reason rather than recall.</p>
+      </div>
+      <div class="step">
+        <h3>Apply under pressure</h3>
+        <p>Cases, viva questions and evidence appraisal at your level, with model answers and references.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band dark" id="levels">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Learn by level</h2>
+        <p class="lede">Seven academies share one syllabus. Start where you are and move up when the questions stop being difficult.</p>
+      </div>
+      <div class="level">
+        <div>
+          <h3>Junior Academy</h3>
+          <p class="who">School age, roughly 13 to 18</p>
+          <span class="depth"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+        <p>How the knee works, injury in young sport, careers in knee medicine and the route into medical school. Written for the classroom and for curiosity.</p>
+        <div class="go"><a href="#junior">Start here</a></div>
+      </div>
+      <div class="level">
+        <div>
+          <h3>Patient Academy</h3>
+          <p class="who">Anyone with knee pain, age 11 to 99</p>
+          <span class="depth"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+        <p>Symptoms, diagnosis, imaging, treatment choices, rehabilitation and prevention. Written to be read the evening before a clinic appointment.</p>
+        <div class="go"><a href="#">Start here</a></div>
+      </div>
+      <div class="level">
+        <div>
+          <h3>Student Academy</h3>
+          <p class="who">A level biology to MBBS</p>
+          <span class="depth"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></span>
+        </div>
+        <p>Anatomy, biomechanics, pathology, history taking, examination and imaging basics. Built around the diagnoses that appear in written papers and OSCEs.</p>
+        <div class="go"><a href="#">Start here</a></div>
+      </div>
+      <div class="level">
+        <div>
+          <h3>MRCS Academy</h3>
+          <p class="who">Core surgical trainees</p>
+          <span class="depth"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>
+        </div>
+        <p>Applied anatomy, examination technique, trauma principles, imaging interpretation and single best answer practice with viva style reasoning.</p>
+        <div class="go"><a href="#">Start here</a></div>
+      </div>
+      <div class="level">
+        <div>
+          <h3>FRCS (Tr and Orth) Academy</h3>
+          <p class="who">Higher surgical trainees</p>
+          <span class="depth"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>
+        </div>
+        <p>Surgical decision making, evidence appraisal, classifications, complications and structured answers to the questions examiners actually ask.</p>
+        <div class="go"><a href="#">Start here</a></div>
+      </div>
+      <div class="level">
+        <div>
+          <h3>Fellowship Academy</h3>
+          <p class="who">Knee fellows</p>
+          <span class="depth"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+        </div>
+        <p>Osteotomy, revision arthroplasty, multiligament reconstruction, cartilage restoration and patellofemoral surgery, including failure analysis.</p>
+        <div class="go"><a href="#">Start here</a></div>
+      </div>
+      <div class="level">
+        <div>
+          <h3>Consultant Masterclass</h3>
+          <p class="who">Practising surgeons</p>
+          <span class="depth"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+        </div>
+        <p>Debates, registry data, emerging technology, surgical pearls and literature updates, with continuing professional development records.</p>
+        <div class="go"><a href="#">Start here</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band wrap" id="junior">
+    <div class="sec-head">
+      <h2>The Junior Academy</h2>
+      <p class="lede">Section 0 sits below the patient tier and closes the spiral at the school end. It is written for learners of roughly 13 to 18 who encounter the knee through sport, through biology or through an ambition to work in medicine.</p>
+    </div>
+
+    <div class="chapters">
+      <div class="chapter">
+        <span class="num">0.1</span>
+        <h3>Discover the knee</h3>
+        <p>An illustrated tour of the joint. The four building blocks, how a hinge rolls and glides, what load does during running and jumping, and why a growing knee behaves differently. Linked to GCSE and A level biology and PE.</p>
+      </div>
+      <div class="chapter">
+        <span class="num">0.2</span>
+        <h3>Sport and your knees</h3>
+        <p>Injuries that show up in young athletes, Osgood Schlatter and growing pains, warm up programmes that are known to work, why ACL risk differs between girls and boys, and when to tell an adult.</p>
+      </div>
+      <div class="chapter">
+        <span class="num">0.3</span>
+        <h3>Careers in knee medicine</h3>
+        <p>An interactive map of the road from school to consultant. A day in the life of a surgeon, a physiotherapist, a radiographer and a theatre nurse. What the letters MRCS and FRCS actually stand for.</p>
+      </div>
+      <div class="chapter">
+        <span class="num">0.4</span>
+        <h3>Getting into medical school</h3>
+        <p>Subject choices, work experience that counts, admissions tests signposted to official sources, personal statements, widening participation routes, and gateway and graduate entry courses.</p>
+      </div>
+      <div class="chapter">
+        <span class="num">0.5</span>
+        <h3>Young investigators</h3>
+        <p>Where medical knowledge comes from. Knee themed EPQ and science fair questions with method guidance, a first look at reading a paper, safe biomechanics experiments, and profiles of working researchers.</p>
+      </div>
+      <div class="chapter">
+        <span class="num">0.6</span>
+        <h3>Certificates and challenges</h3>
+        <p>A Knee Explorer certificate for the first two chapters, a quiz ladder at beginner level, class and school leaderboards, and digital badges that carry into the wider platform.</p>
+      </div>
+      <div class="chapter">
+        <span class="num">0.7</span>
+        <h3>For teachers, coaches and parents</h3>
+        <p>Lesson plans mapped to the biology and PE curricula, downloadable slide decks and worksheets, load management for youth coaches, and guidance on supporting an injured young athlete.</p>
+      </div>
+    </div>
+
+    <div class="stack split">
+      <div>
+        <h3 class="map-title">Rules for this tier</h3>
+        <div class="rules">
+          <ul>
+            <li><b>No commercial content.</b> No products, no supplements and no clinical services anywhere in Section 0. Marketing to minors has no place in an educational brand.</li>
+            <li><b>No clinical advice.</b> Every symptom page closes by pointing the reader to a parent, a teacher, a coach or a doctor. No doses, no self treatment, no rehabilitation prescriptions.</li>
+            <li><b>Privacy by design.</b> Minimal data, no behavioural advertising, high privacy defaults, and parental consent where an account is offered.</li>
+            <li><b>Moderation first.</b> Questions and leaderboards are moderated before they appear. There is no open chat and no direct messaging for under 18s.</li>
+            <li><b>Plain English.</b> Chapters 0.1 and 0.2 target a reading age of 12 to 14 and pass a readability review before publication.</li>
+            <li><b>Safeguarding sign off.</b> A named lead approves outreach and any content that features an identifiable young person.</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h3 class="map-title">Where each chapter leads</h3>
+        <div class="table-scroll">
+          <table class="map">
+            <thead>
+              <tr><th scope="col">Junior chapter</th><th scope="col">Feeds into</th><th scope="col">How the depth grows</th></tr>
+            </thead>
+            <tbody>
+              <tr><td data-label="Junior chapter">0.1 Discover the knee</td><td data-label="Feeds into">Fundamentals and the Anatomy Academy</td><td data-label="How the depth grows">Illustrated tour, then formal anatomy, then surgical anatomy</td></tr>
+              <tr><td data-label="Junior chapter">0.2 Sport and your knees</td><td data-label="Feeds into">Conditions, performance and prevention</td><td data-label="How the depth grows">Recognition, then pathology, then prevention science</td></tr>
+              <tr><td data-label="Junior chapter">0.3 Careers</td><td data-label="Feeds into">Examination masterclasses</td><td data-label="How the depth grows">Pathway map, then how to pass MRCS and FRCS</td></tr>
+              <tr><td data-label="Junior chapter">0.4 Medical school entry</td><td data-label="Feeds into">Student Academy</td><td data-label="How the depth grows">Aspiration, then the undergraduate curriculum</td></tr>
+              <tr><td data-label="Junior chapter">0.5 Young investigators</td><td data-label="Feeds into">Research Academy</td><td data-label="How the depth grows">Curiosity, then method, then landmark papers</td></tr>
+              <tr><td data-label="Junior chapter">0.6 Certificates</td><td data-label="Feeds into">Certification and diplomas</td><td data-label="How the depth grows">Badges, then certificates, then diplomas</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band dark" id="encyclopaedia">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>The knee encyclopaedia</h2>
+        <p class="lede">One reference library behind every level. Each page carries a junior section, a patient section, a student section and a trainee section, with references at the foot.</p>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <h3>Structure</h3>
+          <ul>
+            <li><a href="#">Bones and alignment</a></li>
+            <li><a href="#">Menisci</a></li>
+            <li><a href="#">Ligaments</a></li>
+            <li><a href="#">Cartilage</a></li>
+            <li><a href="#">Tendons</a></li>
+            <li><a href="#">Nerves and vessels</a></li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3>Function</h3>
+          <ul>
+            <li><a href="#">Kinematics</a></li>
+            <li><a href="#">Ligament mechanics</a></li>
+            <li><a href="#">Patellofemoral mechanics</a></li>
+            <li><a href="#">Gait analysis</a></li>
+            <li><a href="#">Load and tissue tolerance</a></li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3>Assessment</h3>
+          <ul>
+            <li><a href="#">Clinical examination</a></li>
+            <li><a href="#">Radiographs</a></li>
+            <li><a href="#">MRI</a></li>
+            <li><a href="#">Ultrasound and CT</a></li>
+            <li><a href="#">Knee score centre</a></li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3>Treatment</h3>
+          <ul>
+            <li><a href="#">Arthroscopy</a></li>
+            <li><a href="#">Ligament reconstruction</a></li>
+            <li><a href="#">Osteotomy</a></li>
+            <li><a href="#">Arthroplasty</a></li>
+            <li><a href="#">Rehabilitation</a></li>
+            <li><a href="#">Research and appraisal</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="conditions" style="margin-top:clamp(2.5rem,5vw,3.5rem)">
+        <h3 class="sub-head">Conditions library</h3>
+        <ul class="col-list">
+          <li><a href="#">ACL injury</a></li>
+          <li><a href="#">PCL injury</a></li>
+          <li><a href="#">MCL injury</a></li>
+          <li><a href="#">Posterolateral corner</a></li>
+          <li><a href="#">Meniscal tears</a></li>
+          <li><a href="#">Cartilage defects</a></li>
+          <li><a href="#">Patellofemoral instability</a></li>
+          <li><a href="#">Osteoarthritis</a></li>
+          <li><a href="#">Inflammatory arthritis</a></li>
+          <li><a href="#">Children's knee</a></li>
+          <li><a href="#">Women's knee health</a></li>
+          <li><a href="#">Tumours and infection</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band wrap" id="curriculum">
+    <div class="sec-head">
+      <h2>Mapped to the UK training pathway</h2>
+      <p class="lede">Each professional page carries a curriculum tag, so a trainee can filter by examination and stage and can cite what they have read in a training portfolio.</p>
+    </div>
+
+    <div class="note">
+      <p>These tables are a working framework. The ISCP trauma and orthopaedic curriculum and the JCIE examination regulations are the authoritative sources. Every mapping is checked against the current published version, including the critical conditions and index procedure appendices, before an alignment claim goes live.</p>
+      <p>KneeSchool covers the knee component of MRCS and FRCS preparation and is designed to sit alongside general resources. It is mapped to these curricula. It is not endorsed by any college, board or society.</p>
+    </div>
+
+    <div class="stack">
+      <h3 class="map-title">The pathway at a glance</h3>
+      <div class="table-scroll">
+        <table class="map">
+          <thead>
+            <tr><th scope="col">Stage</th><th scope="col">Examination or framework</th><th scope="col">KneeSchool tier</th></tr>
+          </thead>
+          <tbody>
+              <tr><td data-label="Stage">School</td><td data-label="Examination or framework">GCSE and A level biology and PE</td><td data-label="KneeSchool tier">Junior Academy</td></tr>
+              <tr><td data-label="Stage">Medical school</td><td data-label="Examination or framework">Medical Licensing Assessment and university finals</td><td data-label="KneeSchool tier">Student Academy</td></tr>
+              <tr><td data-label="Stage">Core surgical training</td><td data-label="Examination or framework">MRCS Part A and Part B</td><td data-label="KneeSchool tier">MRCS Academy</td></tr>
+              <tr><td data-label="Stage">Higher specialty training in trauma and orthopaedics</td><td data-label="Examination or framework">ISCP curriculum, FRCS (Tr and Orth) Section 1 and Section 2</td><td data-label="KneeSchool tier">FRCS Academy</td></tr>
+              <tr><td data-label="Stage">Post CCT fellowship</td><td data-label="Examination or framework">Subspecialty fellowship goals</td><td data-label="KneeSchool tier">Fellowship Academy</td></tr>
+              <tr><td data-label="Stage">Consultant practice</td><td data-label="Examination or framework">Continuing professional development, appraisal and revalidation</td><td data-label="KneeSchool tier">Consultant Masterclass</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h3 class="map-title">MRCS</h3>
+      <div class="table-scroll">
+        <table class="map">
+          <thead>
+            <tr><th scope="col">Examinable domain</th><th scope="col">How the knee expresses it</th><th scope="col">Where it lives on KneeSchool</th></tr>
+          </thead>
+          <tbody>
+              <tr><td data-label="Examinable domain">Applied anatomy</td><td data-label="How the knee expresses it">Osteology, ligament attachments, menisci, neurovascular relations and surgical approaches</td><td data-label="Where it lives on KneeSchool">Anatomy Academy, MRCS layer</td></tr>
+              <tr><td data-label="Examinable domain">Physiology and basic science</td><td data-label="How the knee expresses it">Cartilage biology, bone healing, graft biology and inflammation</td><td data-label="Where it lives on KneeSchool">Fundamentals and anatomy, MRCS layer</td></tr>
+              <tr><td data-label="Examinable domain">Pathology</td><td data-label="How the knee expresses it">Osteoarthritis, septic arthritis, and meniscal and ligament injury patterns</td><td data-label="Where it lives on KneeSchool">Conditions library</td></tr>
+              <tr><td data-label="Examinable domain">Clinical examination</td><td data-label="How the knee expresses it">Structured knee examination, special tests and communication stations</td><td data-label="Where it lives on KneeSchool">Clinical examination and the video academy</td></tr>
+              <tr><td data-label="Examinable domain">Trauma principles</td><td data-label="How the knee expresses it">Knee dislocation, tibial plateau fracture, extensor mechanism rupture and compartment syndrome</td><td data-label="Where it lives on KneeSchool">Conditions and the Surgery Academy, principles layer</td></tr>
+              <tr><td data-label="Examinable domain">Imaging interpretation</td><td data-label="How the knee expresses it">Radiograph and MRI fundamentals of the knee</td><td data-label="Where it lives on KneeSchool">Imaging</td></tr>
+              <tr><td data-label="Examinable domain">Question practice</td><td data-label="How the knee expresses it">Single best answer banks and mock papers at MRCS standard</td><td data-label="Where it lives on KneeSchool">Question bank and the MRCS revision course</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h3 class="map-title">FRCS (Tr and Orth)</h3>
+      <div class="table-scroll">
+        <table class="map">
+          <thead>
+            <tr><th scope="col">Curriculum element</th><th scope="col">Knee relevant requirement</th><th scope="col">Where it lives on KneeSchool</th></tr>
+          </thead>
+          <tbody>
+              <tr><td data-label="Curriculum element">Specialty knowledge syllabus</td><td data-label="Knee relevant requirement">Advanced anatomy, biomechanics, elective and trauma knee pathology, and the evidence base</td><td data-label="Where it lives on KneeSchool">Anatomy through to surgery, FRCS layer throughout</td></tr>
+              <tr><td data-label="Curriculum element">Critical conditions</td><td data-label="Knee relevant requirement">Knee emergencies such as dislocation with vascular injury, septic arthritis, compartment syndrome and open fracture. The full list is checked against the current appendix</td><td data-label="Where it lives on KneeSchool">Conditions library and the Surgery Academy</td></tr>
+              <tr><td data-label="Curriculum element">Index procedures</td><td data-label="Knee relevant requirement">Knee index procedures, chiefly total knee replacement and knee arthroscopy. Indicative numbers are checked against the current appendix</td><td data-label="Where it lives on KneeSchool">Surgery Academy procedure pages, each carrying a curriculum tag</td></tr>
+              <tr><td data-label="Curriculum element">Evidence and research</td><td data-label="Knee relevant requirement">Critical appraisal, landmark trials and statistics</td><td data-label="Where it lives on KneeSchool">Research Academy and landmark papers</td></tr>
+              <tr><td data-label="Curriculum element">Section 1 written paper</td><td data-label="Knee relevant requirement">High volume single best answer practice with explanations at FRCS standard</td><td data-label="Where it lives on KneeSchool">Question bank and the FRCS knee revision course</td></tr>
+              <tr><td data-label="Curriculum element">Section 2 clinical and viva</td><td data-label="Knee relevant requirement">Short and long cases, viva reasoning frameworks and guideline fluency</td><td data-label="Where it lives on KneeSchool">Case library, viva academy and clinical examination</td></tr>
+              <tr><td data-label="Curriculum element">Professional capabilities</td><td data-label="Knee relevant requirement">Consent, shared decision making, multidisciplinary working and disclosure of complications</td><td data-label="Where it lives on KneeSchool">Woven through the procedure and complication pages</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band wrap" id="whole">
+    <div class="holistic">
+      <div>
+        <h2 style="font-size:clamp(1.85rem,3.6vw,2.7rem);font-weight:300">Knee pain is rarely only the knee</h2>
+        <p class="lede" style="margin-top:1rem">A joint fails where load meets tolerance. KneeSchool teaches both sides of that equation, so the plan covers the person and not only the scan.</p>
+      </div>
+      <ul class="factors">
+        <li>
+          <h3>Hip and trunk control</h3>
+          <p>Weak abductors and poor trunk control shift load onto the medial compartment and the patella.</p>
+        </li>
+        <li>
+          <h3>Foot and ankle</h3>
+          <p>Stiff ankles and collapsing arches change how force travels up the limb during landing and running.</p>
+        </li>
+        <li>
+          <h3>Training history</h3>
+          <p>Most overuse injury follows a change in volume, surface or footwear within the preceding six weeks.</p>
+        </li>
+        <li>
+          <h3>Sleep and stress</h3>
+          <p>Poor sleep lowers pain thresholds and slows tissue repair, which alters the response to rehabilitation.</p>
+        </li>
+        <li>
+          <h3>Metabolic health</h3>
+          <p>Body mass, diabetes and smoking influence cartilage health, wound healing and surgical risk.</p>
+        </li>
+        <li>
+          <h3>Previous injury</h3>
+          <p>An earlier meniscal or ligament injury remains the strongest predictor of the next one.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band wrap" id="tools">
+    <div class="sec-head">
+      <h2>Practise, test, track</h2>
+      <p class="lede">Each tool is level aware. Answer at patient level and the explanation stays in plain language. Answer at FRCS level and it cites the paper.</p>
+    </div>
+    <div class="tools">
+      <div class="tool">
+        <h3>Question bank</h3>
+        <p>Single best answer, viva prompts and rapid review sets across anatomy, imaging and management.</p>
+        <a href="#">Take a set</a>
+      </div>
+      <div class="tool">
+        <h3>Case library</h3>
+        <p>Real presentations with images, staged questions, model answers and teaching points.</p>
+        <a href="#">Open a case</a>
+      </div>
+      <div class="tool">
+        <h3>Video academy</h3>
+        <p>Examination technique, imaging walkthroughs, rehabilitation drills and operative steps.</p>
+        <a href="#">Watch a series</a>
+      </div>
+      <div class="tool">
+        <h3>Knee score centre</h3>
+        <p>Validated outcome scores with plain guidance on what a change in score means.</p>
+        <a href="#">Score your knee</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="band dark" id="standards">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>How a page reaches this site</h2>
+        <p class="lede">Every page passes four stages in order. The last stage is a person, and there is no route around it.</p>
+      </div>
+
+      <div class="steps four">
+        <div class="step">
+          <h3>Draft to a brief</h3>
+          <p>A page starts from a brief that names its tiers, what it must cover and what it must leave to a deeper page. The second list is what keeps the spiral a spiral.</p>
+        </div>
+        <div class="step">
+          <h3>Verify the evidence</h3>
+          <p>A separate pass treats the draft as suspect. It confirms each reference exists and that the source supports the claim as written, at the stated size and population.</p>
+        </div>
+        <div class="step">
+          <h3>Edit for plain speech</h3>
+          <p>A third pass holds British spelling, short sentences and varied rhythm. It works from the verified text alone, so it cannot introduce a new fact.</p>
+        </div>
+        <div class="step">
+          <h3>Consultant review</h3>
+          <p>A consultant knee surgeon approves, amends or rejects. An amendment returns to the style gate. Nothing publishes by any other route.</p>
+        </div>
+      </div>
+
+      <div class="stack split">
+        <div>
+          <h3 class="map-title">Rules that cannot be waived</h3>
+          <div class="rules">
+            <ul>
+              <li><b>Consultant sign off is mandatory.</b> There is no path from the automated checks to publication that avoids a named reviewer.</li>
+              <li><b>No invented references.</b> A reference that cannot be retrieved is removed. A missing reference is acceptable. A fabricated one is a failure.</li>
+              <li><b>No commercial content for minors.</b> The junior tier carries no product placement, no supplement content and no promotion of clinical services.</li>
+              <li><b>Guidance carries a date.</b> Every management page records the guideline version it was checked against, and that check repeats each year.</li>
+              <li><b>Uncertainty is stated.</b> Where the evidence is thin or conflicting, the page says so under its own heading rather than settling the question by tone.</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <h3 class="map-title">The style gate</h3>
+          <div class="note">
+            <p>House style is enforced by a deterministic check rather than by judgement, because an editor working at volume will eventually let something through and a rule will not.</p>
+            <p>It rejects em and en dashes, a list of stock phrases, American spellings, any citation marker without a matching reference, and any citation marker at all in junior or patient text. A page that fails goes back for another edit, twice at most, then to a human.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap cta-in">
+      <div>
+        <h2>Begin with one topic</h2>
+        <p>Pick the structure that hurts, read it at your level, then answer ten questions. Progress is saved and your next level unlocks when you are ready.</p>
+      </div>
+      <div class="actions" style="margin-top:0">
+        <a class="btn" href="#levels">Choose a level</a>
+        <a class="btn ghost" href="#encyclopaedia">Browse topics</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot" id="about">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h3>Learn</h3>
+        <ul>
+          <li><a href="#junior">Junior Academy</a></li>
+          <li><a href="#levels">Patient Academy</a></li>
+          <li><a href="#levels">Student Academy</a></li>
+          <li><a href="#levels">MRCS Academy</a></li>
+          <li><a href="#levels">FRCS Academy</a></li>
+          <li><a href="#levels">Fellowship Academy</a></li>
+          <li><a href="#levels">Consultant Masterclass</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="#encyclopaedia">Anatomy</a></li>
+          <li><a href="#encyclopaedia">Imaging</a></li>
+          <li><a href="#conditions">Conditions</a></li>
+          <li><a href="#encyclopaedia">Rehabilitation</a></li>
+          <li><a href="#whole">Whole body factors</a></li>
+          <li><a href="#curriculum">Curriculum mapping</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Clinical care</h3>
+        <ul>
+          <li><a href="https://www.chinmaygupte.com/">Consultant clinic</a></li>
+          <li><a href="#">Imaging and injections</a></li>
+          <li><a href="#">Rehabilitation programmes</a></li>
+          <li><a href="#">Braces and recovery products</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>About</h3>
+        <ul>
+          <li><a href="#standards">Editorial standards</a></li>
+          <li><a href="#junior">For teachers and coaches</a></li>
+          <li><a href="#">Authors and reviewers</a></li>
+          <li><a href="#">References and sources</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <p>KneeSchool is educational. It does not give individual medical advice and it does not replace assessment by a clinician. Seek urgent care for a hot, swollen knee with fever, a knee that cannot bear weight after injury, or new numbness in the leg.</p>
+      <p>Content written for school age learners carries no advertising and no product placement.</p>
+      <p>&copy; 2026 KneeSchool. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
