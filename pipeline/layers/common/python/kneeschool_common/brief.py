@@ -6,8 +6,36 @@ including the governance rule that a brief containing a junior tier can never
 allow commercial content.
 """
 
+import json
+import os
+
 TIERS = ["junior", "patient", "medical_student", "mrcs", "frcs", "fellowship", "consultant"]
 PRIORITIES = ["high", "medium", "low"]
+
+# The Operations Handbook defines three article templates. The Master Publishing
+# Architecture carries a finer grained page_type and maps each one onto a
+# template. Briefs use the architecture's vocabulary, so the map is what decides
+# whether a page_type is valid.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_MAP_CANDIDATES = [
+    os.environ.get("PAGE_TYPE_MAP_PATH"),
+    os.path.join(_HERE, "page_type_map.json"),
+    os.path.join(_HERE, "..", "..", "..", "..", "config", "page_type_map.json"),
+]
+FALLBACK_PAGE_TYPES = ["anatomy", "condition", "procedure"]
+
+
+def page_type_map():
+    for candidate in _MAP_CANDIDATES:
+        if candidate and os.path.exists(candidate):
+            with open(candidate) as fh:
+                return json.load(fh).get("page_types") or {}
+    return dict((t, {"template": t}) for t in FALLBACK_PAGE_TYPES)
+
+
+def template_for(page_type):
+    """The handbook template a given architecture page_type renders through."""
+    return (page_type_map().get(page_type) or {}).get("template")
 
 
 class BriefError(ValueError):
@@ -41,6 +69,15 @@ def validate(brief):
     unknown = [t for t in tiers if t not in TIERS]
     if unknown:
         raise BriefError("unknown tier(s): %s" % ", ".join(unknown))
+
+    page_type = brief.get("page_type")
+    if not page_type:
+        raise BriefError(
+            "page_type is required; the Operations Handbook uses it to select the "
+            "body section order for the page")
+    if not template_for(page_type):
+        raise BriefError("unknown page_type %r; the architecture's page type map defines %s"
+                         % (page_type, ", ".join(sorted(page_type_map()))))
 
     scope = _require(brief, "scope", dict)
     if not scope.get("must_cover"):

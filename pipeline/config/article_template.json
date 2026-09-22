@@ -1,0 +1,149 @@
+{
+  "article_template_version": "1.0",
+  "source_of_truth": "KneeSchool_Operations_Handbook.md section 3",
+  "tier_order": [
+    "junior",
+    "patient",
+    "medical_student",
+    "mrcs",
+    "frcs",
+    "fellowship",
+    "consultant"
+  ],
+  "tier_headings": {
+    "junior": "For Young Learners",
+    "patient": "For Patients",
+    "medical_student": "For Medical Students",
+    "mrcs": "MRCS Level",
+    "frcs": "FRCS Level",
+    "fellowship": "Fellowship Level",
+    "consultant": "Consultant Perspective"
+  },
+  "article_sections_order": [
+    "title",
+    "summary_line",
+    "tier_blocks",
+    "explore_further",
+    "references"
+  ],
+  "tier_block_sections_order": [
+    "body_sections",
+    "key_learning_points",
+    "tier_closers"
+  ],
+  "key_learning_points": {
+    "policy": "per_tier",
+    "per_article": false,
+    "heading": "Key Learning Points",
+    "min_bullets": 3,
+    "max_bullets": 5,
+    "required_in_every_tier_block": true
+  },
+  "faqs": {
+    "required_when": "patient_tier_present",
+    "location": "patient_tier_block",
+    "heading": "Frequently Asked Questions",
+    "min": 3,
+    "max": 5,
+    "allowed_in_other_tiers": false
+  },
+  "citations": {
+    "marker_format": "[n]",
+    "markers_allowed_tiers": [
+      "medical_student",
+      "mrcs",
+      "frcs",
+      "fellowship",
+      "consultant"
+    ],
+    "markers_forbidden_tiers": [
+      "junior",
+      "patient"
+    ],
+    "reference_list": {
+      "location": "article_level_final_section",
+      "heading": "References",
+      "numbering": "order_of_first_citation",
+      "per_tier_lists_allowed": false,
+      "uk_spelling_lint_excluded": true
+    }
+  },
+  "tier_closers": {
+    "junior": {
+      "speak_to_adult_message_required_when": "symptom_or_injury_content_present",
+      "message": "If any of this sounds like something happening to you, speak to a parent, teacher, coach or doctor."
+    },
+    "patient": {
+      "when_to_seek_help_message_required": true
+    }
+  },
+  "page_types": {
+    "anatomy": {
+      "body_sections": [
+        "structure_and_location",
+        "relations",
+        "blood_supply_and_innervation",
+        "function",
+        "clinical_relevance"
+      ],
+      "body_sections_rule": "ordered_subset_per_tier",
+      "word_count": {
+        "min": 800,
+        "max": 1800
+      }
+    },
+    "condition": {
+      "body_sections": [
+        "definition",
+        "epidemiology",
+        "causes_and_risk_factors",
+        "presentation",
+        "examination",
+        "investigations_and_imaging",
+        "management_overview",
+        "rehabilitation_outline",
+        "complications_and_prognosis",
+        "controversies_and_evidence"
+      ],
+      "body_sections_rule": "ordered_subset_per_tier; controversies_and_evidence frcs_and_above_only",
+      "word_count": {
+        "min": 1200,
+        "max": 2500
+      }
+    },
+    "procedure": {
+      "body_sections": [
+        "what_the_operation_is",
+        "indications",
+        "contraindications",
+        "before_the_operation",
+        "the_operation",
+        "after_the_operation_and_rehabilitation",
+        "risks_and_complications",
+        "outcomes_and_evidence",
+        "variations_and_controversies"
+      ],
+      "body_sections_rule": "ordered_subset_per_tier; technique_detail frcs_and_above_only; variations_and_controversies fellowship_and_above_only; junior_block_careers_framing_only",
+      "word_count": {
+        "min": 1500,
+        "max": 3000
+      }
+    }
+  },
+  "word_count_override": "brief.output_requirements.target_word_count overrides page_type default when present",
+  "cross_links": {
+    "heading": "Explore Further",
+    "placeholder_format": "[[page_id | link text]]"
+  },
+  "forbidden": [
+    "article_level_key_learning_points",
+    "faqs_outside_patient_tier",
+    "citation_markers_in_junior_or_patient_body",
+    "per_tier_reference_lists",
+    "em_dash",
+    "en_dash",
+    "figure_dash",
+    "horizontal_bar",
+    "space_hyphen_space"
+  ]
+}

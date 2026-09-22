@@ -383,3 +383,30 @@ h1,h2,h3,p,li,a{overflow-wrap:break-word}
 .safety{border-top:1px solid var(--rule);padding-top:1.4rem;margin-top:clamp(2.4rem,5vw,3.4rem);
   font-size:.93rem;color:var(--ink-soft);max-width:66ch}
 .safety b{font-family:var(--body);font-weight:600;color:var(--ink)}
+
+
+/* ---------- article dial carrying full tier blocks ---------- */
+/* A pipeline article puts a whole tier block inside each panel, so the body
+   cannot have a fixed height. Only one panel shows at a time, so a tall panel
+   costs nothing. */
+.dial-article .dial-body{min-height:0}
+.dial-article .dial-panel h4{font-size:1.02rem;color:var(--gold);font-weight:500;
+  margin:1.5rem 0 .45rem;letter-spacing:.01em}
+.dial-article .dial-panel h4:first-child{margin-top:0}
+.dial-article .dial-panel p{margin-bottom:.9rem;max-width:64ch}
+.dial-article .dial-panel ul{margin:0 0 1rem;padding-left:1.15rem;max-width:64ch}
+.dial-article .dial-panel li{color:rgba(245,241,230,.85);margin-bottom:.4rem}
+.dial-article .dial-panel .klp{border-left:2px solid var(--gold);padding-left:1.1rem;margin:1.2rem 0}
+.dial-article .dial-panel .klp ul{padding-left:0;list-style:none;margin-bottom:0}
+.dial-article .dial-panel .faq p{margin-bottom:.7rem}
+.dial-article .dial-panel .faq b{color:var(--ivory);font-weight:600}
+.dial-article .dial-panel .closer{border-top:1px solid var(--rule-dark);padding-top:.9rem;
+  margin-top:1.2rem;color:var(--gold);font-size:.97rem}
+
+/* ---------- explore further ---------- */
+.explore{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:.6rem 1.6rem;
+  list-style:none;margin:0;padding:0}
+.explore li{border-top:1px solid var(--rule);padding-top:.6rem;font-size:.98rem}
+.explore .pid{color:var(--gold-dark);font-size:.82rem;display:block}
+.explore a{text-decoration:none;border-bottom:1px solid var(--gold)}
+.explore .pending{color:var(--ink-soft);opacity:.75}

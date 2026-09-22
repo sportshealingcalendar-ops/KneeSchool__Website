@@ -38,14 +38,18 @@ EventBridge or manual start
 pipeline/
   prompts/            the three agent prompts as deployed artefacts, versioned
   config/
-    lint_rules.json   the style gate rule set, version 1.0
-    briefs/1.2.3.json the pilot brief for Menisci
+    lint_rules.json        the style gate rule set, version 1.0
+    article_template.json  extracted from the Operations Handbook, section 10
+    page_type_map.json     the architecture's page types, mapped to templates
+    architecture/          the page map and the tracker seed
+    briefs/                one brief per page, generated from the architecture
+  runs/                    pipeline output, one folder per page
   statemachine/       the Step Functions definition
   functions/          seven Lambda handlers
     style_lint/linter.py   the style gate itself
   layers/common/      shared S3, DynamoDB and brief validation code
   infra/template.yaml SAM template: bucket, tracker, layer, functions, workflow
-  tests/              47 tests, no AWS account needed
+  tests/              68 tests, no AWS account needed
   tools/lint_local.py run the style gate over any markdown file
 ```
 

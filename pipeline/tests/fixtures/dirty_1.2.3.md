@@ -1,16 +1,22 @@
 # Menisci
 
-## Junior
+A summary line.
+
+## For Young Learners
+
+### Structure and Location
 
 It is important to note that the meniscus plays a crucial role in the knee [3].
 In today's world we should delve into the anatomy — the structure, the function
 and the blood supply. You should take ibuprofen if it hurts.
 
-### Key learning points
+### Key Learning Points
 
 - One point only.
 
-## Patient
+## For Patients
+
+### Structure and Location
 
 The meniscus is a fiber structure in the center of the knee. Randomized trials
 of arthroscopy in the aging knee are discussed elsewhere. Buy our products at

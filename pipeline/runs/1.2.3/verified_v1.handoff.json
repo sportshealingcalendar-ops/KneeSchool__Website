@@ -1,0 +1,20 @@
+{
+  "page_id": "1.2.3",
+  "prompt_version": "1.0",
+  "claims_checked": 0,
+  "verified": 0,
+  "corrected": [],
+  "removed_claims": [],
+  "reference_actions": [],
+  "red_flags": [
+    "Tier 1 source minimum not met: no textbook or review source was retrieved for any claim",
+    "Twenty claims in the draft are unverified; none has been confirmed against a source"
+  ],
+  "guidelines_checked": [],
+  "escalate_to_consultant": [
+    "Every anatomical claim in this page requires confirmation, because the verification stage could not run. The consultant is standing in for it.",
+    "Decide whether the page may carry descriptive anatomy with no reference list at all, or whether publication waits for the verification stage"
+  ],
+  "status": "NOT_RUN_TOOLS_UNAVAILABLE",
+  "status_note": "This is not a verification result. Agent 2 exists to confirm every reference exists and every claim matches its source. It could not run, because no source retrieval was available. In the deployed pipeline this execution would stop here rather than proceed to styling. It continues in this manual run so the remaining stages can be exercised, and the gap is recorded rather than papered over."
+}

@@ -1,5 +1,5 @@
 {
-  "brief_version": "1.0",
+  "brief_version": "1.1",
   "page_id": "1.2.3",
   "title": "Menisci",
   "section": {
@@ -10,40 +10,45 @@
     "id": "1.2",
     "name": "Basic Knee Anatomy"
   },
+  "page_type": "anatomy",
+  "article_template": "anatomy",
+  "generated_from": "Master Publishing Architecture, pages_0_to_3.json",
   "tiers_required": [
     "junior",
     "patient",
     "medical_student"
   ],
-  "tier_notes": {
-    "junior": "Reading age 12 to 14. No clinical management content.",
-    "patient": "Plain language. End with when-to-seek-help message.",
-    "medical_student": "Foundation anatomy and function. No surgical technique."
-  },
   "scope": {
     "must_cover": [
-      "What the menisci are and where they sit",
-      "Medial versus lateral meniscus basics",
-      "Function: load sharing, stability, lubrication",
-      "Why tears matter, in outline only",
-      "Blood supply zones in simple terms (red, red-white, white)"
+      "What the menisci are, where they sit, and why tears matter, in outline."
     ],
     "must_not_cover": [
-      "Detailed MRI grading (belongs to 5.x Imaging)",
-      "Repair versus meniscectomy decision-making (belongs to 7.x Surgery Academy)",
-      "Root tear biomechanics (belongs to 2.5.7 and 2.6.4)"
+      "Region level anatomy detail (owned per structure by Section 2)",
+      "Pathology (owned by Section 6)",
+      "Operative treatment (owned by Section 7)",
+      "Tear classification (owned by 6.28 to 6.33)",
+      "MRI grading (owned by 5.6.2)",
+      "Repair decisions (owned by 7.9)",
+      "Root anatomy detail (owned by 2.5.7 and 2.6.4)"
     ],
     "sibling_pages": [
       "1.2.1",
       "1.2.2",
       "1.2.4",
-      "1.2.5"
+      "1.2.5",
+      "1.2.6",
+      "1.2.7",
+      "1.2.8",
+      "1.2.9",
+      "1.2.10"
     ],
     "deeper_spiral_pages": [
+      "2.1",
       "2.5",
       "2.6",
-      "6.x meniscal tears",
-      "7.x meniscal surgery"
+      "3.6",
+      "5.6",
+      "6.27"
     ]
   },
   "curriculum_tags": [
@@ -83,9 +88,13 @@
   },
   "pipeline": {
     "priority": "high",
-    "requested_by": "editor",
-    "created_at": "2026-08-28T00:00:00Z",
+    "requested_by": "architecture",
     "regen_count": 0,
     "consultant_assigned": null
+  },
+  "tier_notes": {
+    "junior": "Reading age 12 to 14. No clinical management content.",
+    "patient": "Plain language. End with when-to-seek-help message.",
+    "medical_student": "Foundation anatomy and function. No surgical technique."
   }
 }

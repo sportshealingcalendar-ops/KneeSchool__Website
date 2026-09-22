@@ -1,0 +1,22 @@
+{
+  "page_id": "1.2.3",
+  "prompt_version": "1.0",
+  "dashes_removed": 0,
+  "ai_phrases_removed": [],
+  "terminology_standardised": [
+    {"chosen": "menisci", "replaced": ["meniscal pads", "cartilage pads"]},
+    {"chosen": "medial meniscus", "replaced": ["inner meniscus"]},
+    {"chosen": "lateral meniscus", "replaced": ["outer meniscus"]}
+  ],
+  "sentences_flagged_for_human_review": [
+    "Junior tier: 'A twist with the foot planted can tear one, and a torn pad spreads load less well than an intact one.' Kept deliberately brief to stay inside the brief's outline only instruction for tears. Confirm the level of detail is right for reading age 12 to 14.",
+    "Patient tier: 'A scan can show a tear in a knee that does not hurt, so the examination and the history carry as much weight as the image.' This is a clinically loaded statement written without a citation. Confirm the wording."
+  ],
+  "readability_estimate_by_tier": {
+    "junior": "short sentences, concrete analogies, target reading age 12 to 14, not formally scored",
+    "patient": "plain English, no jargon without a gloss",
+    "medical_student": "foundation academic register"
+  },
+  "status": "STYLE_COMPLETE_READY_FOR_CONSULTANT_REVIEW",
+  "status_note": "The draft already met house style, so no substantive edit was made. Dash rules, the banned phrase list, UK spelling, citation scoping and the structure template were all checked and all passed. The styler works from the verified text only and introduced no new fact."
+}

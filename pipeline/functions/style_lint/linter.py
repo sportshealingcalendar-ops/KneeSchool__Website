@@ -40,6 +40,24 @@ TIER_ALIASES = {
 }
 
 REFERENCE_HEADINGS = ["references", "reference list", "sources"]
+CROSS_LINK_HEADINGS = ["explore further"]
+
+# Human headings the handbook uses in prose, mapped to the slugs its JSON block
+# uses. Anything not listed falls back to slugifying the heading, which covers
+# the sections whose prose name and slug already match.
+SECTION_ALIASES = {
+    "who gets it": "epidemiology",
+    "who gets it (epidemiology)": "epidemiology",
+    "how it presents": "presentation",
+    "before the operation": "before_the_operation",
+    "before the operation (work up and consent points)": "before_the_operation",
+}
+
+# Sections the handbook restricts to the deeper tiers.
+SECTION_TIER_FLOOR = {
+    "controversies_and_evidence": "frcs",
+    "variations_and_controversies": "fellowship",
+}
 KLP_HEADINGS = ["key learning points", "key learning point"]
 FAQ_HEADINGS = ["frequently asked questions", "faqs", "faq", "common questions"]
 
@@ -57,12 +75,16 @@ CODE_FENCE = re.compile(r"```.*?```", re.DOTALL)
 class Document(object):
     """A parsed draft: raw text, tier blocks, reference list, body."""
 
-    def __init__(self, text):
+    def __init__(self, text, template=None):
         self.raw = text or ""
+        self.template = template or {}
         self.lines = self.raw.split("\n")
         self.sections = self._split_headings()
         self.reference_span = self._find_reference_span()
-        self.tier_spans = self._find_tier_spans()
+        self.tier_spans = {}
+        self.tier_by_alias = {}
+        self.tier_heading_level = {}
+        self._find_tier_spans()
 
     # -- parsing ---------------------------------------------------
 
@@ -98,18 +120,37 @@ class Document(object):
 
     def _find_reference_span(self):
         for level, title, start, end in self.sections:
-            if self._normalise(title) in REFERENCE_HEADINGS:
+            if self._normalise(title) in REFERENCE_HEADINGS and level <= 2:
                 return (start, len(self.lines))
         return None
 
+    def article_section(self, headings):
+        """Find a top level (H2) section by normalised heading."""
+        for level, title, start, end in self.sections:
+            if level <= 2 and self._normalise(title) in headings:
+                return (title, start, end)
+        return None
+
     def _find_tier_spans(self):
-        spans = {}
+        """Exact handbook headings first. A loose alias match is still recorded,
+        so the tier-scoped rules keep working on a draft that used the wrong
+        heading, and STRUCT-001 reports the heading itself as the fault."""
+        exact = {}
+        for tier, heading in (self.template.get("tier_headings") or {}).items():
+            exact[self._normalise(heading)] = tier
+
         for level, title, start, end in self.sections:
             norm = self._normalise(title)
-            for tier, aliases in TIER_ALIASES.items():
-                if norm in aliases and tier not in spans:
-                    spans[tier] = (start, end)
-        return spans
+            tier = exact.get(norm)
+            if tier and tier not in self.tier_spans:
+                self.tier_spans[tier] = (start, end)
+                self.tier_heading_level[tier] = level
+                continue
+            for alias_tier, aliases in TIER_ALIASES.items():
+                if norm in aliases and alias_tier not in self.tier_spans:
+                    self.tier_spans[alias_tier] = (start, end)
+                    self.tier_heading_level[alias_tier] = level
+                    self.tier_by_alias[alias_tier] = title
 
     # -- views -----------------------------------------------------
 
@@ -175,6 +216,10 @@ class Document(object):
 
 
 # ---------------------------------------------------------------- helpers
+
+
+def normalise_title(title):
+    return Document._normalise(title)
 
 
 def context(text, start, end, width=50):
@@ -375,9 +420,33 @@ def rule_cite_002(doc, rule):
     return out
 
 
-def rule_struct_001(doc, rule, brief):
-    """Structure against the brief: tier blocks, key learning points, FAQs,
-    reference list, word count."""
+def slugify(title):
+    slug = SECTION_ALIASES.get(title)
+    if slug:
+        return slug
+    return re.sub(r"_+", "_", re.sub(r"[^a-z0-9]+", "_", title)).strip("_")
+
+
+def is_ordered_subset(found, allowed):
+    """Every found section must appear in `allowed`, in that order."""
+    i = 0
+    for item in found:
+        while i < len(allowed) and allowed[i] != item:
+            i += 1
+        if i == len(allowed):
+            return False
+        i += 1
+    return True
+
+
+def rule_struct_001(doc, rule, brief, template):
+    """Structure against the handbook template and the brief.
+
+    The handbook is the source of truth for shape; the brief says which tiers
+    and, where it chooses to, overrides the word count. Everything checked here
+    is regenerated from the handbook's machine-readable block rather than
+    restated, so the rule and the handbook cannot drift apart.
+    """
     out = []
     sev = rule["severity"]
     desc = rule["description"]
@@ -385,60 +454,147 @@ def rule_struct_001(doc, rule, brief):
     def fail(msg, matched=""):
         out.append(finding(rule["id"], sev, desc + ": " + msg, matched, ""))
 
+    tier_order = template.get("tier_order") or TIERS
+    headings = template.get("tier_headings") or {}
+    klp_cfg = template.get("key_learning_points") or {}
+    faq_cfg = template.get("faqs") or {}
+    closers = template.get("tier_closers") or {}
+    page_types = template.get("page_types") or {}
+    cross = template.get("cross_links") or {}
+
     required = brief.get("tiers_required") or []
+    rank = dict((t, i) for i, t in enumerate(tier_order))
+
+    # -- tier blocks present, correctly headed, in ascending order -----------
     for tier in required:
         if tier not in doc.tier_spans:
-            fail("no content block found for tier '%s'" % tier, tier)
+            fail("no content block found for tier '%s' (expected heading '%s')"
+                 % (tier, headings.get(tier, tier)), tier)
+        elif tier in doc.tier_by_alias:
+            fail("tier '%s' is headed '%s'; the handbook requires the exact heading '%s'"
+                 % (tier, doc.tier_by_alias[tier], headings.get(tier, tier)), tier)
 
-    outreq = brief.get("output_requirements") or {}
-    klp = outreq.get("key_learning_points_per_tier") or {}
-    lo, hi = klp.get("min"), klp.get("max")
+    extra = [t for t in doc.tier_spans if t not in required]
+    for tier in extra:
+        fail("tier block '%s' is present but the brief does not require it" % tier, tier)
+
+    present = [t for t in tier_order if t in doc.tier_spans]
+    ordered = sorted(present, key=lambda t: doc.tier_spans[t][0])
+    if present != ordered:
+        fail("tier blocks are out of order; the handbook fixes ascending tier order",
+             " then ".join(ordered))
+
+    # -- per tier: key learning points, body sections, closers ---------------
+    klp_heading = normalise_title(klp_cfg.get("heading", "Key Learning Points"))
+    faq_heading = normalise_title(faq_cfg.get("heading", "Frequently Asked Questions"))
+    lo, hi = klp_cfg.get("min_bullets"), klp_cfg.get("max_bullets")
+
+    page_type = brief.get("page_type")
+    # The architecture's fine grained type maps onto one of the handbook's three
+    # templates. A page_type with no template is a configuration gap, not a
+    # drafting error, so it is reported as such.
+    template_name = resolve_template(page_type)
+    spec = page_types.get(template_name) or {}
+    allowed_sections = spec.get("body_sections") or []
+
     for tier in required:
         span = doc.tier_spans.get(tier)
         if not span:
             continue
-        block = None
-        for title, start, end in doc.subsection_titles_within(span):
-            if title in KLP_HEADINGS:
-                block = (start, end)
-                break
-        if block is None:
-            fail("tier '%s' has no key learning points block" % tier, tier)
-            continue
-        n = doc.bullet_count(block[0] + 1, block[1])
-        if lo is not None and n < lo:
-            fail("tier '%s' has %d key learning points, minimum %d" % (tier, n, lo), tier)
-        elif hi is not None and n > hi:
-            fail("tier '%s' has %d key learning points, maximum %d" % (tier, n, hi), tier)
+        subs = doc.subsection_titles_within(span)
 
-    faq = outreq.get("faqs_patient_level") or {}
-    if faq and "patient" in required:
+        klp = [(t, a, b) for t, a, b in subs if t == klp_heading]
+        if not klp:
+            fail("tier '%s' has no '%s' block" % (tier, klp_cfg.get("heading")), tier)
+        else:
+            n = doc.bullet_count(klp[0][1] + 1, klp[0][2])
+            if lo is not None and n < lo:
+                fail("tier '%s' has %d key learning points, minimum %d" % (tier, n, lo), tier)
+            elif hi is not None and n > hi:
+                fail("tier '%s' has %d key learning points, maximum %d" % (tier, n, hi), tier)
+
+        # FAQs belong to one tier only
+        has_faq = [t for t, a, b in subs if t == faq_heading]
+        if has_faq and tier != faq_cfg.get("location", "patient_tier_block").split("_")[0]:
+            fail("tier '%s' carries an FAQ block; the handbook allows FAQs only in the "
+                 "patient tier" % tier, tier)
+
+        # a reference list inside a tier block is forbidden
+        for t, a, b in subs:
+            if t in REFERENCE_HEADINGS:
+                fail("tier '%s' carries its own reference list; the handbook allows one "
+                     "article level list only" % tier, tier)
+
+        # body sections must be an ordered subset of the page type's list
+        if allowed_sections:
+            body = [slugify(t) for t, a, b in subs
+                    if t not in (klp_heading, faq_heading) and t not in REFERENCE_HEADINGS]
+            unknown = [x for x in body if x not in allowed_sections]
+            if unknown:
+                fail("tier '%s' has section(s) not in the %s page template: %s"
+                     % (tier, template_name, ", ".join(unknown)), tier)
+            elif not is_ordered_subset(body, allowed_sections):
+                fail("tier '%s' body sections are out of the order the %s template fixes"
+                     % (tier, template_name), tier)
+            for slug in body:
+                floor = SECTION_TIER_FLOOR.get(slug)
+                if floor and rank.get(tier, 0) < rank.get(floor, 0):
+                    fail("tier '%s' carries '%s', which the handbook restricts to %s and "
+                         "above" % (tier, slug, floor), tier)
+
+        # tier closers
+        closer = closers.get(tier) or {}
+        text = doc.tier_text(tier)
+        message = closer.get("message")
+        if message and message.rstrip(".").lower() not in text.lower():
+            fail("tier '%s' does not carry the standard closing message" % tier, tier)
+        if closer.get("when_to_seek_help_message_required"):
+            if not re.search(r"seek|urgent|see (a|your) (doctor|clinician|gp)|speak to",
+                             text, re.IGNORECASE):
+                fail("tier '%s' has no when to seek help message" % tier, tier)
+
+    # -- patient FAQ count ---------------------------------------------------
+    if faq_cfg and faq_cfg.get("required_when") == "patient_tier_present" \
+            and "patient" in required:
         span = doc.tier_spans.get("patient")
         block = None
         if span:
-            for title, start, end in doc.subsection_titles_within(span):
-                if title in FAQ_HEADINGS:
-                    block = (start, end)
+            for title, a, b in doc.subsection_titles_within(span):
+                if title == faq_heading:
+                    block = (a, b)
                     break
         if block is None:
-            fail("patient tier has no FAQ block")
+            fail("patient tier has no '%s' block" % faq_cfg.get("heading"))
         else:
             n = len(re.findall(r"^\s*(?:\*\*Q|Q[.:]|####\s)", "\n".join(
                 doc.lines[block[0] + 1: block[1]]), re.MULTILINE))
-            if faq.get("min") is not None and n < faq["min"]:
-                fail("patient FAQ block has %d questions, minimum %d" % (n, faq["min"]))
-            elif faq.get("max") is not None and n > faq["max"]:
-                fail("patient FAQ block has %d questions, maximum %d" % (n, faq["max"]))
+            if faq_cfg.get("min") is not None and n < faq_cfg["min"]:
+                fail("patient FAQ block has %d questions, minimum %d" % (n, faq_cfg["min"]))
+            elif faq_cfg.get("max") is not None and n > faq_cfg["max"]:
+                fail("patient FAQ block has %d questions, maximum %d" % (n, faq_cfg["max"]))
+
+    # -- article level sections ---------------------------------------------
+    if cross.get("heading"):
+        if doc.article_section([normalise_title(cross["heading"])]) is None:
+            fail("no '%s' section" % cross["heading"])
 
     if doc.reference_span is None and CITE_MARKER.search(doc.body_text()):
-        fail("no reference list")
+        fail("citation markers are used but there is no article level reference list")
 
-    wc = outreq.get("target_word_count") or {}
+    # -- word count: the brief overrides the page type default ---------------
+    wc = (brief.get("output_requirements") or {}).get("target_word_count") \
+        or spec.get("word_count") or {}
     n = doc.word_count()
     if wc.get("min") is not None and n < wc["min"]:
-        fail("word count %d below the brief minimum %d" % (n, wc["min"]))
+        fail("word count %d below the minimum %d" % (n, wc["min"]))
     elif wc.get("max") is not None and n > wc["max"]:
-        fail("word count %d above the brief maximum %d" % (n, wc["max"]))
+        fail("word count %d above the maximum %d" % (n, wc["max"]))
+
+    if page_type and not spec:
+        fail("brief names page_type '%s', which resolves to template '%s'; the handbook "
+             "defines no such template" % (page_type, template_name), page_type)
+    if not page_type:
+        fail("brief does not name a page_type, so body section order cannot be checked")
 
     return out
 
@@ -478,11 +634,49 @@ def load_rules(path=None):
     raise IOError("lint_rules.json not found; set LINT_RULES_PATH")
 
 
-def lint(text, brief=None, rules=None):
+def load_page_type_map(path=None):
+    here = os.path.dirname(os.path.abspath(__file__))
+    for candidate in [path, os.environ.get("PAGE_TYPE_MAP_PATH"),
+                      os.path.join(here, "page_type_map.json"),
+                      os.path.join(here, "..", "..", "config", "page_type_map.json")]:
+        if candidate and os.path.exists(candidate):
+            with open(candidate) as fh:
+                return json.load(fh).get("page_types") or {}
+    return {}
+
+
+def resolve_template(page_type):
+    if not page_type:
+        return None
+    mapped = load_page_type_map().get(page_type)
+    if mapped:
+        return mapped.get("template")
+    return page_type
+
+
+def load_article_template(path=None):
+    """The handbook's machine-readable article template. It is the source of
+    truth for structure; STRUCT-001 reads it rather than restating it."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        path,
+        os.environ.get("ARTICLE_TEMPLATE_PATH"),
+        os.path.join(here, "article_template.json"),
+        os.path.join(here, "..", "..", "config", "article_template.json"),
+    ]
+    for candidate in candidates:
+        if candidate and os.path.exists(candidate):
+            with open(candidate, "r") as fh:
+                return json.load(fh)
+    return {}
+
+
+def lint(text, brief=None, rules=None, template=None):
     """Return a lint report dict. pass is False if any 'fail' rule fired."""
     brief = brief or {}
     rules = rules or load_rules()
-    doc = Document(text)
+    template = load_article_template() if template is None else template
+    doc = Document(text, template)
     findings = []
 
     for rule in rules.get("rules", []):
@@ -502,7 +696,7 @@ def lint(text, brief=None, rules=None):
         elif rid == "CITE-002":
             findings += rule_cite_002(doc, rule)
         elif rid == "STRUCT-001":
-            findings += rule_struct_001(doc, rule, brief)
+            findings += rule_struct_001(doc, rule, brief, template)
         elif rule.get("banned_phrases"):
             findings += run_phrase_rule(doc, rule, brief)
         elif rule.get("pattern"):
@@ -516,11 +710,13 @@ def lint(text, brief=None, rules=None):
         "fail_count": len(fails),
         "warn_count": len(warns),
         "findings": findings,
+        "article_template_version": template.get("article_template_version"),
         "document": {
             "word_count": doc.word_count(),
             "tiers_present": doc.tiers_present(),
             "has_reference_list": doc.reference_span is not None,
             "sentence_count": len(doc.prose_sentences()),
+            "page_type": brief.get("page_type"),
         },
     }
 

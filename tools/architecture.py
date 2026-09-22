@@ -1,0 +1,208 @@
+#!/usr/bin/env python3
+"""Read the Master Publishing Architecture and produce what the pipeline needs.
+
+    python3 tools/architecture.py brief 1.2.3 --out pipeline/config/briefs/1.2.3.json
+    python3 tools/architecture.py seed  --out pipeline/config/architecture/tracker_seed.json
+    python3 tools/architecture.py show  1.2.3
+
+A brief is not written by hand. The architecture owns which tiers a page serves,
+what it must not cover, and which pages own that material instead. That last list
+is the whole mechanism that stops the same fact being written across three
+thousand pages, so it is copied from the architecture rather than retyped.
+"""
+
+import argparse
+import collections
+import json
+import os
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ARCH_DIR = os.path.join(ROOT, "pipeline", "config", "architecture")
+TEMPLATE = os.path.join(ROOT, "pipeline", "config", "article_template.json")
+TYPE_MAP = os.path.join(ROOT, "pipeline", "config", "page_type_map.json")
+
+
+def load_pages():
+    pages = []
+    for name in sorted(os.listdir(ARCH_DIR)):
+        if name.startswith("pages_") and name.endswith(".json"):
+            with open(os.path.join(ARCH_DIR, name)) as fh:
+                pages.extend(json.load(fh))
+    return pages
+
+
+def load(path):
+    with open(path) as fh:
+        return json.load(fh)
+
+
+def page_sort_key(page_id):
+    """1.2.10 sorts after 1.2.9, not between 1.2.1 and 1.2.2."""
+    out = []
+    for part in str(page_id).split("."):
+        out.append((0, int(part)) if part.isdigit() else (1, 0, part))
+    return out
+
+
+def build_brief(page, merge=None):
+    tpl = load(TEMPLATE)
+    type_map = load(TYPE_MAP)["page_types"]
+    template_name = (type_map.get(page["page_type"]) or {}).get("template")
+    defaults = (tpl["page_types"].get(template_name) or {}).get("word_count") or {}
+
+    brief = collections.OrderedDict()
+    brief["brief_version"] = "1.1"
+    brief["page_id"] = page["page_id"]
+    brief["title"] = page["title"]
+    brief["section"] = page["section"]
+    brief["chapter"] = page["chapter"]
+    brief["page_type"] = page["page_type"]
+    brief["article_template"] = template_name
+    brief["generated_from"] = "Master Publishing Architecture, pages_0_to_3.json"
+    brief["tiers_required"] = page["tiers_required"]
+    brief["scope"] = collections.OrderedDict([
+        ("must_cover", [page["scope"]]),
+        ("must_not_cover", page["must_not_cover"]),
+        ("sibling_pages", page["siblings"]),
+        ("deeper_spiral_pages", page["deeper_pages"]),
+    ])
+    brief["curriculum_tags"] = []
+    brief["source_requirements"] = collections.OrderedDict([
+        ("kb_topic_filter", page["title"].lower()),
+        ("minimum", {"textbook_or_review": 1, "peer_reviewed_for_clinical_claims": True}),
+        ("preferred_recency_years", 10),
+        ("guidelines_expected", []),
+    ])
+    klp = tpl["key_learning_points"]
+    faq = tpl["faqs"]
+    brief["output_requirements"] = collections.OrderedDict([
+        ("language", "en-GB"),
+        ("format", "markdown"),
+        ("key_learning_points_per_tier", {"min": klp["min_bullets"], "max": klp["max_bullets"]}),
+        ("faqs_patient_level", {"min": faq["min"], "max": faq["max"]}),
+        ("target_word_count", dict(defaults)),
+        ("internal_link_placeholders", True),
+    ])
+    junior = "junior" in page["tiers_required"]
+    brief["governance"] = collections.OrderedDict([
+        ("commercial_content_allowed", False),
+        ("clinical_advice_allowed", False),
+        ("junior_tier_present", junior),
+    ])
+    brief["pipeline"] = collections.OrderedDict([
+        ("priority", page["priority"]),
+        ("requested_by", "architecture"),
+        ("regen_count", 0),
+        ("consultant_assigned", None),
+    ])
+
+    prior = None
+    if merge and os.path.exists(merge):
+        try:
+            prior = load(merge)
+        except ValueError:
+            # An unreadable or empty merge target is not a reason to refuse to
+            # generate the brief. Fall back to the architecture's values.
+            prior = None
+    if prior:
+        # Hand set values that the architecture does not own are preserved.
+        for path in (("output_requirements", "target_word_count"),
+                     ("curriculum_tags",), ("tier_notes",),
+                     ("source_requirements", "kb_topic_filter")):
+            node, target = prior, brief
+            ok = True
+            for key in path[:-1]:
+                node = node.get(key) if isinstance(node, dict) else None
+                target = target.get(key)
+                if node is None or target is None:
+                    ok = False
+                    break
+            if ok and isinstance(node, dict) and path[-1] in node:
+                target[path[-1]] = node[path[-1]]
+            elif ok and path[-1] in prior and len(path) == 1:
+                brief[path[-1]] = prior[path[-1]]
+    return brief
+
+
+def cmd_brief(args, pages):
+    by_id = dict((p["page_id"], p) for p in pages)
+    page = by_id.get(args.page_id)
+    if not page:
+        sys.exit("page %s is not in the architecture" % args.page_id)
+    brief = build_brief(page, merge=args.merge or args.out)
+    text = json.dumps(brief, indent=2) + "\n"
+    if args.out:
+        with open(args.out, "w") as fh:
+            fh.write(text)
+        print("%s written for page %s (%s, %s)"
+              % (args.out, page["page_id"], page["page_type"], brief["article_template"]))
+    else:
+        print(text)
+
+
+def cmd_seed(args, pages):
+    """Tracker seed, in the queue order the architecture specifies: high pages in
+    section order, then medium, then low; lower page id first within a band."""
+    bands = {"high": 0, "medium": 1, "low": 2}
+    ordered = sorted(pages, key=lambda p: (bands.get(p["priority"], 9),
+                                           page_sort_key(p["page_id"])))
+    items = []
+    for n, p in enumerate(ordered, 1):
+        items.append(collections.OrderedDict([
+            ("page_id", p["page_id"]),
+            ("title", p["title"]),
+            ("section", p["section"]["id"]),
+            ("chapter", p["chapter"]["id"]),
+            ("page_type", p["page_type"]),
+            ("tiers_required", p["tiers_required"]),
+            ("priority", p["priority"]),
+            ("queue_position", n),
+            ("source_status", "not_started"),
+            ("draft_status", "not_started"),
+            ("qa_status", "assistant_checked"),
+            ("publication_status", "ready"),
+            ("curriculum_tags", []),
+            ("regen_count", 0),
+            ("red_flag_count", 0),
+        ]))
+    text = json.dumps(items, indent=2) + "\n"
+    with open(args.out, "w") as fh:
+        fh.write(text)
+    counts = collections.Counter(p["priority"] for p in pages)
+    print("%s written: %d pages (high %d, medium %d, low %d)"
+          % (args.out, len(items), counts["high"], counts["medium"], counts["low"]))
+    print("queue head: " + ", ".join(i["page_id"] for i in items[:8]))
+
+
+def cmd_show(args, pages):
+    by_id = dict((p["page_id"], p) for p in pages)
+    page = by_id.get(args.page_id)
+    if not page:
+        sys.exit("page %s is not in the architecture" % args.page_id)
+    print(json.dumps(page, indent=2))
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    b = sub.add_parser("brief", help="generate a content brief for one page")
+    b.add_argument("page_id")
+    b.add_argument("--out")
+    b.add_argument("--merge", help="existing brief whose hand set values are preserved")
+
+    s = sub.add_parser("seed", help="generate the tracker seed and queue order")
+    s.add_argument("--out", required=True)
+
+    w = sub.add_parser("show", help="print one page's architecture entry")
+    w.add_argument("page_id")
+
+    args = ap.parse_args()
+    pages = load_pages()
+    {"brief": cmd_brief, "seed": cmd_seed, "show": cmd_show}[args.cmd](args, pages)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,92 @@
+{
+  "page_id": "1.2.3",
+  "prompt_version": "1.0",
+  "article_template_version": "1.0",
+  "page_type": "anatomy",
+  "tiers_covered": [
+    "junior",
+    "patient",
+    "medical_student"
+  ],
+  "scope_statement": "Page 1.2.3 Menisci sits in Section 1 Knee Fundamentals, Chapter 1.2 Basic Knee Anatomy. It introduces what the menisci are, where they sit, how the medial and lateral differ, what they do mechanically, why tears matter in outline, and the vascular zones. Detailed MRI grading belongs to 5.x, repair against meniscectomy decision making to 7.x, and root tear biomechanics to 2.5.7 and 2.6.4.",
+  "sources": [],
+  "source_note": "No sources were retrieved. The generation environment had no access to PubMed, Cochrane, the knowledge base or any textbook. Under the Operations Handbook a missing reference is acceptable and an invented one is a critical failure, so no source is listed and no citation marker appears in the draft. The Tier 1 source minimum is NOT met, and this draft would not pass Tier 1 in the deployed pipeline.",
+  "claims_needing_verification": [
+    "Medial meniscus is larger and more open in shape than the lateral, and covers a smaller proportion of its tibial plateau",
+    "Lateral meniscus is more nearly circular and covers a greater proportion of its plateau",
+    "Medial meniscus is attached to the deep fibres of the medial collateral ligament and to the capsule, limiting excursion",
+    "Lateral meniscus is separated from the capsule posterolaterally by the popliteal hiatus and is more mobile",
+    "Transverse ligament connects the two anterior horns",
+    "Meniscofemoral ligaments run from the posterior horn of the lateral meniscus to the medial femoral condyle",
+    "Vascular supply arises from the medial and lateral geniculate arteries via a perimeniscal capillary plexus",
+    "Vascular penetration is limited to the peripheral portion, producing red, red-white and white zones",
+    "Avascular inner zone is nourished by diffusion from synovial fluid",
+    "Mechanoreceptors concentrated at the horns contribute to joint proprioception",
+    "Collagen is arranged predominantly in circumferential bundles with radial tie fibres",
+    "Circumferential bundles resist extrusion in tension, termed hoop stress, anchored by the roots",
+    "Meniscal loss reduces contact area and raises peak contact stress on articular cartilage",
+    "Both menisci translate posteriorly in flexion, the lateral further than the medial",
+    "Composition is largely water with type one collagen dominating the dry weight",
+    "Proteoglycan content is low relative to articular cartilage",
+    "A small number of people have a discoid lateral meniscus",
+    "Degenerate tears may occur without a single causative event",
+    "Meniscal tears are found on imaging in asymptomatic knees",
+    "MRI is the standard investigation for suspected meniscal injury"
+  ],
+  "gaps_or_uncertainties": [
+    "No quantitative figure is given for the proportion of load transmitted through the menisci, because none could be verified",
+    "No prevalence figure is given for discoid lateral meniscus",
+    "No figure is given for the rise in contact stress after meniscal loss",
+    "Zone terminology is given descriptively rather than with published zone widths"
+  ],
+  "duplication_risk_pages": [
+    "2.5",
+    "2.5.7",
+    "2.6",
+    "2.6.4",
+    "3.6",
+    "5.6.2",
+    "6.27",
+    "7.9"
+  ],
+  "status": "AI_DRAFT_READY_FOR_VERIFICATION",
+  "architecture_check": {
+    "checked_against": "Master Publishing Architecture Part 1, page 1.2.3",
+    "note": "This draft was written before the architecture arrived, against the pilot brief's three must_not_cover items. The architecture carries seven. Three of the four extra constraints are breached, which is the spiral control working as designed rather than a drafting failure.",
+    "overstep": [
+      {
+        "rule": "Region level anatomy detail (owned per structure by Section 2)",
+        "severity": "clear",
+        "detail": "The medical student tier carries the meniscofemoral and transverse ligaments, the popliteal hiatus, coronary fibres, the perimeniscal capillary plexus, the geniculate supply and the circumferential and radial collagen architecture. Chapters 2.5 and 2.6 own that material.",
+        "owned_by": [
+          "2.5",
+          "2.6"
+        ]
+      },
+      {
+        "rule": "Pathology (owned by Section 6)",
+        "severity": "clear",
+        "detail": "The patient tier describes two mechanisms of tear, traumatic and degenerate. The architecture scope line allows why tears matter in outline; describing how they arise is pathology.",
+        "owned_by": [
+          "6"
+        ]
+      },
+      {
+        "rule": "Root anatomy detail (owned by 2.5.7 and 2.6.4)",
+        "severity": "borderline",
+        "detail": "The roots are named twice, as the anchor that lets hoop stress develop. Minimal, and arguably required to explain function at all. Editorial ruling needed.",
+        "owned_by": [
+          "2.5.7",
+          "2.6.4"
+        ]
+      }
+    ],
+    "cleared": [
+      "Tear classification: absent.",
+      "MRI grading: named only as a pointer to 5.6.2, which is what the architecture wants.",
+      "Repair decisions: named only as a pointer to 7.9.",
+      "Operative treatment: one clause of rationale, pointing to the surgery section for the decision."
+    ],
+    "recommendation": "Redraft as v2 with the medical student tier cut back to what 1.2 Basic Knee Anatomy owns, and the patient tier's mechanism sentences removed. Expect roughly 250 fewer words, which stays inside the brief's range."
+  }
+}
