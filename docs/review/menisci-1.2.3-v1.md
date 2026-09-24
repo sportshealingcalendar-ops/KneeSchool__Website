@@ -11,6 +11,7 @@
 | Word count | 1598, brief range 800 to 1600 |
 | Style gate | Passed. Zero failures, zero warnings, template 1.0 |
 | Evidence verification | **Did not run** |
+| Scope ruling | With you. The page is not redrafted pending your answer to questions 6 and 7 |
 | Reference list | **None** |
 
 ## What this page is
@@ -102,10 +103,11 @@ the four extra ones.
 This is the spiral control working, not a drafting failure. The draft was written
 against an incomplete brief.
 
-**Editorial ruling needed before v2:** how much structural detail may 1.2 Basic
-Knee Anatomy carry before it belongs to Section 2? The medical student tier is
-the page's whole value at that level, and cutting it to bare description may
-leave too little.
+**This is now questions 6 and 7 below, and it is yours to rule on.** The page has
+deliberately not been redrafted. The editorial decision of 24 September 2026 was
+to leave it as written, because the ruling is about how much anatomy a
+Fundamentals page should teach, which is a clinical judgement rather than a
+production one.
 
 ## Specific questions
 
@@ -114,6 +116,8 @@ leave too little.
 3. Is the medical student tier's omission of all quantitative data acceptable, or does it need figures before it is useful?
 4. Does anything at a deeper tier contradict a shallower one?
 5. Would you publish an anatomy page with no reference list at all, given the verification stage cannot yet run?
+6. **Scope, the main one.** The medical student tier carries the meniscofemoral and transverse ligaments, the popliteal hiatus, coronary fibres, the perimeniscal plexus, the geniculate supply and the collagen architecture. The architecture gives that material to chapters 2.5 and 2.6. Does it stay here, move to Section 2, or stay in a reduced form? Your answer sets the boundary for every Fundamentals page, not only this one.
+7. **Pathology.** The patient tier describes traumatic against degenerate tear mechanisms. The architecture gives pathology to Section 6 and allows this page only why tears matter, in outline. Is the current wording inside that line?
 
 ## Governance confirmed
 

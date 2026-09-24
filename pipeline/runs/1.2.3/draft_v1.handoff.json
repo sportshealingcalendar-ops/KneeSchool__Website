@@ -87,6 +87,14 @@
       "Repair decisions: named only as a pointer to 7.9.",
       "Operative treatment: one clause of rationale, pointing to the surgery section for the decision."
     ],
-    "recommendation": "Redraft as v2 with the medical student tier cut back to what 1.2 Basic Knee Anatomy owns, and the patient tier's mechanism sentences removed. Expect roughly 250 fewer words, which stays inside the brief's range."
+    "recommendation": "No redraft before review. Editorial decision of 24 September 2026: the scope question goes to the consultant as part of Tier 4, because the ruling is about how much anatomy a Fundamentals page should carry, which is a clinical teaching judgement rather than a production one. If the consultant rules the detail out, v2 cuts roughly 250 words from the medical student tier and the patient tier's two mechanism sentences, which stays inside the brief's range.",
+    "decision_log": [
+      {
+        "date": "2026-09-24",
+        "decision": "Leave the pilot as drafted. The consultant rules on scope.",
+        "by": "editor",
+        "supersedes": "Redraft as v2 with the medical student tier cut back to what 1.2 Basic Knee Anatomy owns, and the patient tier's mechanism sentences removed. Expect roughly 250 fewer words, which stays inside the brief's range."
+      }
+    ]
   }
 }
